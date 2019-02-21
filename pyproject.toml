@@ -12,6 +12,7 @@ dependencies = [
     "torch>=2.7.0",
     "transformers>=4.42.4",
     "timm>=1.0.15",
+    "pymupdf>=1.25.5",
 ]
 
 [[tool.uv.index]]
