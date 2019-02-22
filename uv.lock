@@ -1094,6 +1094,20 @@ wheels = [
 ]
 
 [[package]]
+name = "ocrmac"
+version = "1.0.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "pillow" },
+    { name = "pyobjc-framework-vision" },
+]
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/dd/dc/de3e9635774b97d9766f6815bbb3f5ec9bce347115f10d9abbf2733a9316/ocrmac-1.0.0.tar.gz", hash = "sha256:5b299e9030c973d1f60f82db000d6c2e5ff271601878c7db0885e850597d1d2e", size = 1463997 }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/e5/f4/eef75cb750ff3e40240c8cbc713d68f8fc12b10eef016f7d4966eb05b065/ocrmac-1.0.0-py2.py3-none-any.whl", hash = "sha256:0b5a072aa23a9ead48132cb2d595b680aa6c3c5a6cb69525155e35ca95610c3a", size = 12100 },
+]
+
+[[package]]
 name = "opencv-python-headless"
 version = "4.11.0.86"
 source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
@@ -1250,6 +1264,7 @@ dependencies = [
     { name = "docling" },
     { name = "dotenv" },
     { name = "matplotlib" },
+    { name = "ocrmac" },
     { name = "pillow" },
     { name = "pymupdf" },
     { name = "timm" },
@@ -1263,6 +1278,7 @@ requires-dist = [
     { name = "docling", specifier = ">=2.31.1" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "matplotlib", specifier = ">=3.10.3" },
+    { name = "ocrmac", specifier = ">=1.0.0" },
     { name = "pillow", specifier = ">=11.2.1" },
     { name = "pymupdf", specifier = ">=1.25.5" },
     { name = "timm", specifier = ">=1.0.15" },
@@ -1418,6 +1434,83 @@ wheels = [
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/bd/db/b4edec9e731ea7c2b74bf28b9091ed4e919d5c7f889ef86352b7fd416197/pymupdf-1.25.5-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:6ed7fc25271004d6d3279c20a80cb2bb4cda3efa9f9088dcc07cd790eca0bc63", size = 21293562 },
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/ec/47/682a8ddce650e09f5de6809c9bce926b2493a19b7f9537d80d4646989670/pymupdf-1.25.5-cp39-abi3-win32.whl", hash = "sha256:65e18ddb37fe8ec4edcdbebe9be3a8486b6a2f42609d0a142677e42f3a0614f8", size = 15110464 },
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/71/c2/a9059607f80dcaf2392f991748cfc53456820392c0220cff02572653512a/pymupdf-1.25.5-cp39-abi3-win_amd64.whl", hash = "sha256:7f44bc3d03ea45b2f68c96464f96105e8c7908896f2fb5e8c04f1fb8dae7981e", size = 16579671 },
+]
+
+[[package]]
+name = "pyobjc-core"
+version = "11.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/5c/94/a111239b98260869780a5767e5d74bfd3a8c13a40457f479c28dcd91f89d/pyobjc_core-11.0.tar.gz", hash = "sha256:63bced211cb8a8fb5c8ff46473603da30e51112861bd02c438fbbbc8578d9a70", size = 994931 }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/52/05/fa97309c3b1bc1ec90d701db89902e0bd5e1024023aa2c5387b889458b1b/pyobjc_core-11.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:50675c0bb8696fe960a28466f9baf6943df2928a1fd85625d678fa2f428bd0bd", size = 727295 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/56/ce/bf3ff9a9347721a398c3dfb83e29b43fb166b7ef590f3f7b7ddcd283df39/pyobjc_core-11.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:a03061d4955c62ddd7754224a80cdadfdf17b6b5f60df1d9169a3b1b02923f0b", size = 739750 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/72/16/0c468e73dbecb821e3da8819236fe832dfc53eb5f66a11775b055a7589ea/pyobjc_core-11.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:c338c1deb7ab2e9436d4175d1127da2eeed4a1b564b3d83b9f3ae4844ba97e86", size = 743900 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/f3/88/cecec88fd51f62a6cd7775cc4fb6bfde16652f97df88d28c84fb77ca0c18/pyobjc_core-11.0-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:b4e9dc4296110f251a4033ff3f40320b35873ea7f876bd29a1c9705bb5e08c59", size = 791905 },
+]
+
+[[package]]
+name = "pyobjc-framework-cocoa"
+version = "11.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+dependencies = [
+    { name = "pyobjc-core" },
+]
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/c5/32/53809096ad5fc3e7a2c5ddea642590a5f2cb5b81d0ad6ea67fdb2263d9f9/pyobjc_framework_cocoa-11.0.tar.gz", hash = "sha256:00346a8cb81ad7b017b32ff7bf596000f9faa905807b1bd234644ebd47f692c5", size = 6173848 }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/23/97/81fd41ad90e9c241172110aa635a6239d56f50d75923aaedbbe351828580/pyobjc_framework_Cocoa-11.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:3ea7be6e6dd801b297440de02d312ba3fa7fd3c322db747ae1cb237e975f5d33", size = 385534 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/5b/8d/0e2558447c26b3ba64f7c9776a5a6c9d2ae8abf9d34308b174ae0934402e/pyobjc_framework_Cocoa-11.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:280a577b83c68175a28b2b7138d1d2d3111f2b2b66c30e86f81a19c2b02eae71", size = 385811 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/1d/a5/609281a7e89efefbef9db1d8fe66bc0458c3b4e74e2227c644f9c18926fa/pyobjc_framework_Cocoa-11.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:15b2bd977ed340074f930f1330f03d42912d5882b697d78bd06f8ebe263ef92e", size = 385889 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/93/f6/2d5a863673ef7b85a3cba875c43e6c495fb1307427a6801001ae94bb5e54/pyobjc_framework_Cocoa-11.0-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:5750001db544e67f2b66f02067d8f0da96bb2ef71732bde104f01b8628f9d7ea", size = 389831 },
+]
+
+[[package]]
+name = "pyobjc-framework-coreml"
+version = "11.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+dependencies = [
+    { name = "pyobjc-core" },
+    { name = "pyobjc-framework-cocoa" },
+]
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/2e/64/4f0a990ec0955fe9b88f1fa58303c8471c551996670216527b4ac559ed8f/pyobjc_framework_coreml-11.0.tar.gz", hash = "sha256:143a1f73a0ea0a0ea103f3175cb87a61bbcb98f70f85320ed4c61302b9156d58", size = 81452 }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/50/dc/334823bb3faa490259df7611772e804eb883c56436fc69123e8a3a5ba0ea/pyobjc_framework_CoreML-11.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:e290ad9c0ac5f057ce3885d35e33fadc115f59111f2e04f168c45e2890cb86e8", size = 11320 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/90/9f/3d053b95fbeeaf480d33fcc067504e205049591f6bee17e3a700b988d96c/pyobjc_framework_CoreML-11.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:48320a57589634c206d659799284a5133aaa006cf4562f772697df5b479043e4", size = 11321 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/5c/c3/087296d83d33d19118b9e8605555b01b0fb00c27a9a68c515bf2cee8404d/pyobjc_framework_CoreML-11.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:cc73c6a2a3dd4181b679c12b83066e3a36e9b4213626821633f87ce5be4ad29d", size = 11338 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/82/5b/75b9e0eddf8018be00babb75dfd45cb0023cd7186ac177fe2cf5c00521b3/pyobjc_framework_CoreML-11.0-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:45fd15a483f9c4c408da005e3b2816a71112050de2a666cb9a4de20518eb3aca", size = 11804 },
+]
+
+[[package]]
+name = "pyobjc-framework-quartz"
+version = "11.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+dependencies = [
+    { name = "pyobjc-core" },
+    { name = "pyobjc-framework-cocoa" },
+]
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/a5/ad/f00f3f53387c23bbf4e0bb1410e11978cbf87c82fa6baff0ee86f74c5fb6/pyobjc_framework_quartz-11.0.tar.gz", hash = "sha256:3205bf7795fb9ae34747f701486b3db6dfac71924894d1f372977c4d70c3c619", size = 3952463 }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/a3/6a/68957c8c5e8f0128d4d419728bac397d48fa7ad7a66e82b70e64d129ffca/pyobjc_framework_Quartz-11.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:d251696bfd8e8ef72fbc90eb29fec95cb9d1cc409008a183d5cc3246130ae8c2", size = 212349 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/60/5d/df827b78dcb5140652ad08af8038c9ddd7e01e6bdf84462bfee644e6e661/pyobjc_framework_Quartz-11.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:cb4a9f2d9d580ea15e25e6b270f47681afb5689cafc9e25712445ce715bcd18e", size = 212061 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/a6/9e/54c48fe8faab06ee5eb80796c8c17ec61fc313d84398540ee70abeaf7070/pyobjc_framework_Quartz-11.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:973b4f9b8ab844574461a038bd5269f425a7368d6e677e3cc81fcc9b27b65498", size = 212478 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/4a/28/456b54a59bfe11a91b7b4e94f8ffdcf174ffd1efa169f4283e5b3bc10194/pyobjc_framework_Quartz-11.0-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:66ab58d65348863b8707e63b2ec5cdc54569ee8189d1af90d52f29f5fdf6272c", size = 217973 },
+]
+
+[[package]]
+name = "pyobjc-framework-vision"
+version = "11.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+dependencies = [
+    { name = "pyobjc-core" },
+    { name = "pyobjc-framework-cocoa" },
+    { name = "pyobjc-framework-coreml" },
+    { name = "pyobjc-framework-quartz" },
+]
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/ef/53/dc2e0562a177af9306efceb84bc21f5cf7470acaa8f28f64e62bf828b7e1/pyobjc_framework_vision-11.0.tar.gz", hash = "sha256:45342e5253c306dbcd056a68bff04ffbfa00e9ac300a02aabf2e81053b771e39", size = 133175 }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/7f/84/d23a745d46858409a1dca3e7f5cb3089c148ebb8d42e7a6289e1972ad650/pyobjc_framework_Vision-11.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:ca7cc48332d804a02b5b17f31bed52dd4b7c323f9e4ff4b4e7ecd35d39cc0759", size = 21754 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/3a/80/6db9fc2a3f8b991860156f4700f979ad8aa1e9617b0efa720ee3b52e3602/pyobjc_framework_Vision-11.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:1b07aa867dda47d2a4883cd969e248039988b49190ba097cbe9747156b5d1f30", size = 17099 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/f0/57/0f293f3bae614451292d4206ce9cef92d755b26feb545b35478be3324871/pyobjc_framework_Vision-11.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:b2fd9088d91d950b2127e98785b3d4c6b55516bf733af7cab4b30950571d32be", size = 17111 },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/c6/45/02b8cdde64ca896734204bcadd1e03abc2f96ced1f812b262cb0ddf2d783/pyobjc_framework_Vision-11.0-cp313-cp313t-macosx_10_13_universal2.whl", hash = "sha256:9821d930025d0c084a83ed216751d5b4f022cb4a47d42440b1c6766d8952620d", size = 17302 },
 ]
 
 [[package]]
