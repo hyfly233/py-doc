@@ -15,7 +15,6 @@ from docling.datamodel.pipeline_options import (
     ResponseFormat,
     PdfPipelineOptions,
     TableStructureOptions,
-    OcrMacOptions,
 )
 from docling.document_converter import DocumentConverter, PdfFormatOption, WordFormatOption
 from docling_core.transforms.chunker.hybrid_chunker import HybridChunker
@@ -85,13 +84,6 @@ def main():
             num_threads=cpu_cores,
             device=AcceleratorDevice.CUDA,
             cuda_use_flash_attention2=True,
-        )
-    elif torch.mps.is_available():
-        pdf_pipeline_options.ocr_options = OcrMacOptions()
-        # pdf_pipeline_options.ocr_options = EasyOcrOptions()
-        pdf_pipeline_options.accelerator_options = AcceleratorOptions(
-            num_threads=cpu_cores,
-            device=AcceleratorDevice.MPS,
         )
     else:
         pdf_pipeline_options.accelerator_options = AcceleratorOptions(
