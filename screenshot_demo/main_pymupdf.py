@@ -2,13 +2,17 @@ import os
 
 import fitz  # PyMuPDF
 import pymupdf.table
-from PIL import Image
+from PIL import (Image)
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 def main():
+    """
+    从 PDF 中截取表格区域并保存为图片
+    例外：PDF 中有图片，图片中有表格，无法截取
+    """
     pdf_path: str = os.getenv('PDF_PATH')
     pdf_basename = os.path.splitext(os.path.basename(pdf_path))[0]
 
@@ -29,7 +33,7 @@ def main():
                 # 保存为图片
                 img: Image.Image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
-                png_name = f"screenshot_{pdf_basename}_page{page.number}_table{i}.png"
+                png_name = f"png_{pdf_basename}_p{page.number}_t{i}.png"
                 img.save(png_name)
                 print("截图已保存为:", png_name)
 
