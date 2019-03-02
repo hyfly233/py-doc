@@ -14,7 +14,7 @@ from docling.datamodel.pipeline_options import (
     ApiVlmOptions,
     ResponseFormat,
     PdfPipelineOptions,
-    TableStructureOptions,
+    TableStructureOptions, TableFormerMode,
 )
 from docling.document_converter import DocumentConverter, PdfFormatOption, WordFormatOption
 from docling_core.transforms.chunker.hybrid_chunker import HybridChunker
@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 # 加载 .env 文件
 load_dotenv()
 
-SOURCE = os.getenv('SOURCE')
+PDF_PATH = os.getenv('PDF_PATH')
 
 
 logging.basicConfig(
@@ -60,7 +60,8 @@ def main():
     ## 表格处理
     pdf_pipeline_options.do_table_structure = True  # 启用表结构提取
     pdf_pipeline_options.table_structure_options = TableStructureOptions(
-        do_cell_matching=True,  # 启用单元格匹配
+        do_cell_matching=False,  # 是否启用单元格匹配
+        mode=TableFormerMode.FAST
     )
     ## 代码块处理
     pdf_pipeline_options.do_code_enrichment = True  # 启用代码块提取
@@ -133,7 +134,7 @@ def main():
             f"开始转换文档，开始时间 [{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))}] ..........")
 
         # 转换文档
-        input_doc_path = Path(SOURCE)
+        input_doc_path = Path(PDF_PATH)
         conv_result = converter.convert(input_doc_path)
 
         end_time = time.time()
@@ -162,7 +163,7 @@ def main():
         for i, table in enumerate(tables):
             # 单独导出表格
             with (output_dir / f"{doc_filename}_{i}.md").open("w", encoding="utf-8") as fp:
-                fp.write(conv_result.document.export_to_markdown())
+                fp.write(table.export_to_markdown())
 
             # ？？？
             location_tokens = table.get_location_tokens(doc=document)
@@ -201,8 +202,8 @@ def main():
         with (output_dir / f"{doc_filename}.md").open("w", encoding="utf-8") as fp:
             fp.write(conv_result.document.export_to_markdown())
 
-        with (output_dir / f"{doc_filename}.html").open("w", encoding="utf-8") as fp:
-            fp.write(conv_result.document.export_to_html())
+        # with (output_dir / f"{doc_filename}.html").open("w", encoding="utf-8") as fp:
+        #     fp.write(conv_result.document.export_to_html())
 
         _log.info("导出结果到 Markdown 完成 ..........")
 
