@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List
 
 import fitz  # PyMuPDF
-from PIL import (Image)
+from PIL import Image
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import (
     AcceleratorDevice,
@@ -34,10 +34,10 @@ _log = logging.getLogger(__name__)
 
 
 class TableLocation:
-    def __init__(self, page_no: int, name: str, bbox: tuple[float, float, float, float]):
+    def __init__(self, page_no: int, name: str, rect: tuple[float, float, float, float]):
         self.page_no = page_no
         self.name = name
-        self.bbox = bbox
+        self.rect = rect
 
 def main():
     pdf_path: str = os.getenv('PDF_PATH')
@@ -110,6 +110,7 @@ def main():
                 f"表格位置: left {bbox.l} top {bbox.t} right {bbox.r} bottom {bbox.b} - "
             )
 
+            # docling 的坐标与 fitz 的坐标系 y 轴是相反的
             table_locations.append(TableLocation(page_no, f"p{page_no}_t{i}", (bbox.l, bbox.t, bbox.r, bbox.b)))
 
     _log.info(f"###########################")
@@ -119,9 +120,30 @@ def main():
         doc: fitz.Document = fitz.open(pdf_path)
         for table_location in table_locations:
             # fitz 获取对应的 page
-            page = doc[table_location.page_no]
-            rect: tuple[float, float, float, float] = table_location.bbox
-            clip: fitz.Rect = fitz.Rect(rect)
+            page: fitz.Page = doc[table_location.page_no - 1]  # page_no 从 1 开始
+            l, t, r, b = table_location.rect
+
+            page_height = page.rect.height
+            page_width = page.rect.width
+
+            _log.info(f"fitz 打开的第 {table_location.page_no} 页 高度: {page_height} 宽度: {page_width} - ")
+
+            # docling 的坐标与 fitz 的坐标系 y 轴是相反的
+            # 坐标系转换
+            new_t = page_height - t
+            new_b = page_height - b
+
+            _log.info(f"表格 {table_location.name} 位置: left {l} top {new_t} right {r} bottom {new_b} - ")
+
+            # 限制在页面范围内
+            l = max(0, min(l, page_width))
+            r = max(0, min(r, page_width))
+            new_t = max(0, min(new_t, page_height))
+            new_b = max(0, min(new_b, page_height))
+
+            safe_rect = (l, new_t, r, new_b)
+
+            clip: fitz.Rect = fitz.Rect(safe_rect)
             pix: fitz.Pixmap = page.get_pixmap(clip=clip, dpi=200)
             # 保存为图片
             img: Image.Image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
