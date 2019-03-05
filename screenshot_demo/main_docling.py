@@ -150,7 +150,7 @@ def main():
 
             png_name = f"{table_location.name}.png"
             img.save(png_name)
-            print("截图已保存为:", png_name)
+            _log.info(f"截图已保存为: {png_name}")
 
 
 if __name__ == '__main__':
