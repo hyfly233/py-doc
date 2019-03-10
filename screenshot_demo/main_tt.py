@@ -65,10 +65,19 @@ def main():
                 print(f"  表格 {i} - xmin: {xmin}, ymin: {ymin}, xmax: {xmax}, ymax: {ymax}")
 
                 # 传入给模型的图片是经过缩放的，获取到的坐标需要还原
+                padding = 8  # 尝试 5~20，看实际效果
+
+                # 还原到 PDF 页面坐标
                 xmin_pdf = xmin * scale_x
                 ymin_pdf = ymin * scale_y
                 xmax_pdf = xmax * scale_x
                 ymax_pdf = ymax * scale_y
+
+                # 加 padding，并确保不超出页面范围
+                xmin_pdf = max(0, xmin_pdf - padding)
+                ymin_pdf = max(0, ymin_pdf - padding)
+                xmax_pdf = min(page.rect.width, xmax_pdf + padding)
+                ymax_pdf = min(page.rect.height, ymax_pdf + padding)
 
                 table_locations.append(TableLocation((page_number + 1),
                                                      f"p{page_number + 1}_t{i}",
