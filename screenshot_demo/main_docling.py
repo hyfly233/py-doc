@@ -79,13 +79,6 @@ def main():
 
     _log.info(f"###########################")
 
-    _log.info(f"文档的页数 {len(conv_result.pages)} ---- ")
-    for i, page in enumerate(conv_result.pages):
-        _log.info(f"第 {i + 1} 页 - "
-                  f"pageNo {page.page_no} - "
-                  f"高度: {page.size.height} 宽度: {page.size.width} - "
-                  )
-
     document: DoclingDocument = conv_result.document
     # 获取 table 的数量、位置
     tables: List[TableItem] = document.tables
@@ -126,14 +119,10 @@ def main():
             page_height = page.rect.height
             page_width = page.rect.width
 
-            _log.info(f"fitz 打开的第 {table_location.page_no} 页 高度: {page_height} 宽度: {page_width} - ")
-
             # docling 的坐标与 fitz 的坐标系 y 轴是相反的
             # 坐标系转换
             new_t = page_height - t
             new_b = page_height - b
-
-            _log.info(f"表格 {table_location.name} 位置: left {l} top {new_t} right {r} bottom {new_b} - ")
 
             # 限制在页面范围内
             l = max(0, min(l, page_width))
@@ -150,7 +139,6 @@ def main():
 
             png_name = f"{table_location.name}.png"
             img.save(png_name)
-            _log.info(f"截图已保存为: {png_name}")
 
 
 if __name__ == '__main__':
