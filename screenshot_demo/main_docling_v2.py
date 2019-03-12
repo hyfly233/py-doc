@@ -50,7 +50,8 @@ def main():
         do_cell_matching=False,  # 启用单元格匹配
         mode=TableFormerMode.FAST
     )
-    pipeline_options.generate_table_images = True
+    pipeline_options.images_scale = 3.0
+    pipeline_options.generate_page_images = True
 
     pipeline_options.accelerator_options = AcceleratorOptions(
         num_threads=10,
