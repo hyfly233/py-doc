@@ -34,8 +34,13 @@ def main():
                 img: Image.Image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
                 png_name = f"png_{pdf_basename}_p{page.number}_t{i}.png"
-                img.save(png_name)
+                # img.save(png_name)
                 print("截图已保存为:", png_name)
+
+            images = page.get_images()
+            for img_index, image in enumerate(images):
+                print(image)
+
 
 
 if __name__ == '__main__':
