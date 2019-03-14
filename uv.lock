@@ -1315,6 +1315,7 @@ dependencies = [
     { name = "ocrmac" },
     { name = "pillow" },
     { name = "pymupdf" },
+    { name = "tessdata" },
     { name = "tesseract" },
     { name = "timm" },
     { name = "torch" },
@@ -1331,6 +1332,7 @@ requires-dist = [
     { name = "ocrmac", specifier = ">=1.0.0" },
     { name = "pillow", specifier = ">=11.2.1" },
     { name = "pymupdf", specifier = ">=1.25.5" },
+    { name = "tessdata", specifier = ">=1.0.0" },
     { name = "tesseract", specifier = ">=0.1.3" },
     { name = "timm", specifier = ">=1.0.15" },
     { name = "torch", specifier = ">=2.7.0" },
@@ -2175,6 +2177,15 @@ source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
 sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/ec/fe/802052aecb21e3797b8f7902564ab6ea0d60ff8ca23952079064155d1ae1/tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c", size = 81090 }
 wheels = [
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f", size = 35252 },
+]
+
+[[package]]
+name = "tessdata"
+version = "1.0.0"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/d1/6f/4e0f1abe1598e40f5fe99c71d84869cceecd59807cdcf83865f3e7f19c65/tessdata-1.0.0.tar.gz", hash = "sha256:4e289281e2b01ea7561e53400084210cec17d2a19d2d28a4542977af3e5c6fbe" }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/a0/ab/491728fd0db79545a3f7955202b3fa09381c50a20094fb2a0e91b68dac2e/tessdata-1.0.0-py2.py3-none-any.whl", hash = "sha256:801e828d211c71380e26128db8e66fbd649ef0b0cb96f2403fbafe6c8c448ee6" },
 ]
 
 [[package]]
