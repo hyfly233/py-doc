@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+os.environ["TESSDATA_PREFIX"] = os.getenv("TESSDATA_PREFIX")
+
 
 def main():
     pdf_path: str = os.getenv('PDF_PATH')
