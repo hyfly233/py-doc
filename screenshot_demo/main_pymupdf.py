@@ -1,3 +1,4 @@
+import logging
 import os
 
 import fitz  # PyMuPDF
@@ -7,6 +8,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+)
+_log = logging.getLogger(__name__)
 
 def main():
     """
@@ -22,6 +27,8 @@ def main():
     if doc.page_count > 0:
         for page in doc:
             find_tables: pymupdf.table.TableFinder = fitz.find_tables(page)
+
+            _log.info("找到 %d 个表格", len(find_tables.tables))
             for i, table in enumerate(find_tables.tables):
                 (x0, y0, x1, y1) = table.bbox
 
@@ -34,13 +41,13 @@ def main():
                 img: Image.Image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
                 png_name = f"png_{pdf_basename}_p{page.number}_t{i}.png"
-                # img.save(png_name)
-                print("截图已保存为:", png_name)
+                img.save(png_name)
+                _log.info("截图已保存为:", png_name)
 
             images = page.get_images()
-            for img_index, image in enumerate(images):
-                print(image)
-
+            _log.info("找到 %d 张图片", len(images))
+            # for img_index, image in enumerate(images):
+            #     _log.info(image)
 
 
 if __name__ == '__main__':
