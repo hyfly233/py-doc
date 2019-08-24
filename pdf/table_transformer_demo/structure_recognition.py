@@ -3,7 +3,7 @@ from PIL import Image
 from huggingface_hub import hf_hub_download
 from transformers import TableTransformerForObjectDetection, DetrImageProcessor
 
-from table_transformer_demo.utils import plot_results
+from pdf.table_transformer_demo.utils import plot_results
 
 model = TableTransformerForObjectDetection.from_pretrained("microsoft/table-transformer-structure-recognition")
 

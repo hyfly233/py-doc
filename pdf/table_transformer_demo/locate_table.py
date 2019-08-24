@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from torch import Tensor
 from transformers import TableTransformerForObjectDetection, DetrImageProcessor
 
-from table_transformer_demo.utils import plot_results
+from pdf.table_transformer_demo.utils import plot_results
 
 # 加载 .env 文件
 load_dotenv()
