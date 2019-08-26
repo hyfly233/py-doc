@@ -1,5 +1,6 @@
 import os
 
+import fitz
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -7,7 +8,6 @@ load_dotenv()
 
 def parse_document(file_path):
     if file_path.endswith('.pdf'):
-        import fitz  # PyMuPDF
         doc = fitz.open(file_path)
         text_blocks = []
         for page_num in range(doc.page_count):
@@ -28,8 +28,6 @@ def parse_document(file_path):
 
 
 def highlight_issues_in_document(doc, text_blocks, issues):
-    import fitz
-
     highlighted_doc = doc
 
     for issue in issues:
@@ -80,4 +78,4 @@ if __name__ == '__main__':
         "reasoning": "数据库状态不一致导致无法正常解除IP关联"
     }])
 
-    new_doc.save("highlighted_document.pdf")
+    new_doc.save("output/highlighted_document.pdf")
