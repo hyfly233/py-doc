@@ -24,7 +24,7 @@ def parse_document(file_path):
                                 "font": span["font"],
                                 "size": span["size"]
                             })
-    return text_blocks, doc
+        return text_blocks, doc
 
 
 def highlight_issues_in_document(doc, text_blocks, issues):
