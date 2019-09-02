@@ -3,7 +3,7 @@ name = "py-doc"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "dotenv>=0.9.9",
     "docling>=2.31.1",
@@ -17,7 +17,7 @@ dependencies = [
     "ultralytics>=8.3.133",
     "tesseract>=0.1.3",
     "tessdata>=1.0.0",
-    "python-docx>=1.1.2",
+    "python-docx>=1.2.0",
 ]
 
 [[tool.uv.index]]
