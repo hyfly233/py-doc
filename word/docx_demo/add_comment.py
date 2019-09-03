@@ -11,6 +11,13 @@ def add_comment(file_path):
         doc = Document(file_path)
         doc.add_page_break()
         paragraph = doc.add_paragraph("这是一个新的段落。")
+        doc.add_comment(
+            runs=paragraph.runs,
+            text="这是一个评论。",
+            author="作者名",
+            initials="作者缩写",
+        )
+        doc.save(file_path)
 
 
 if __name__ == '__main__':
