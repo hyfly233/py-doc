@@ -9,7 +9,12 @@ def parse_document(file_path):
     if file_path.endswith('.docx'):
         doc = Document(file_path)
         text_blocks = []
-        for para in doc.paragraphs:
+        for i, para in enumerate(doc.paragraphs):
+            print("Paragraph Index:", i)
+            print(f" 文本: {para.text[:50]} ...")
+            # pf = para.paragraph_format
+            # 获取段落格式信息
+            # print("Paragraph Format:", pf.__dict__)
             for run in para.runs:
                 text_blocks.append({
                     "text": run.text,
