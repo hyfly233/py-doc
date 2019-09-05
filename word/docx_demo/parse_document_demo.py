@@ -11,7 +11,8 @@ def parse_document(file_path):
         text_blocks = []
         for i, para in enumerate(doc.paragraphs):
             print("Paragraph Index:", i)
-            print(f" 文本: {para.text[:50]} ...")
+            # print(f" 文本: {para.text[:50]} ...")
+            print(f" 文本: {para.text[:]}")
             # pf = para.paragraph_format
             # 获取段落格式信息
             # print("Paragraph Format:", pf.__dict__)
