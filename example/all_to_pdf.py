@@ -109,29 +109,31 @@ def process_image_to_pdf(file_data):
     # 打开图像
     image = Image.open(BytesIO(file_data))
 
+    return
+
     # OCR识别文本
-    text_content = pytesseract.image_to_string(image, lang='chi_sim+eng')
-
-    # 创建包含图像的PDF
-    pdf_doc = fitz.open()
-    page = pdf_doc.new_page(width=image.width, height=image.height)
-
-    # 插入图像
-    img_bytes = BytesIO()
-    image.save(img_bytes, format='PNG')
-    img_bytes.seek(0)
-
-    page.insert_image(page.rect, stream=img_bytes.getvalue())
-
-    # 保存PDF
-    pdf_bytes = BytesIO()
-    pdf_doc.save(pdf_bytes)
-    pdf_doc.close()
-
-    page_info = [{
-        "page_num": 0,
-        "ocr_text": text_content,
-        "is_image": True
-    }]
-
-    return pdf_bytes.getvalue(), text_content, page_info
+    # text_content = pytesseract.image_to_string(image, lang='chi_sim+eng')
+    #
+    # # 创建包含图像的PDF
+    # pdf_doc = fitz.open()
+    # page = pdf_doc.new_page(width=image.width, height=image.height)
+    #
+    # # 插入图像
+    # img_bytes = BytesIO()
+    # image.save(img_bytes, format='PNG')
+    # img_bytes.seek(0)
+    #
+    # page.insert_image(page.rect, stream=img_bytes.getvalue())
+    #
+    # # 保存PDF
+    # pdf_bytes = BytesIO()
+    # pdf_doc.save(pdf_bytes)
+    # pdf_doc.close()
+    #
+    # page_info = [{
+    #     "page_num": 0,
+    #     "ocr_text": text_content,
+    #     "is_image": True
+    # }]
+    #
+    # return pdf_bytes.getvalue(), text_content, page_info
