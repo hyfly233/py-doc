@@ -1,11 +1,15 @@
 import os
+import tempfile
+# import pytesseract
+from io import BytesIO
+
 import fitz  # PyMuPDF
+from PIL import Image
 from docx import Document
 from docx2pdf import convert
-from PIL import Image
-import pytesseract
-from io import BytesIO
-import tempfile
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def main(inputs):
@@ -137,3 +141,13 @@ def process_image_to_pdf(file_data):
     # }]
     #
     # return pdf_bytes.getvalue(), text_content, page_info
+
+
+if __name__ == '__main__':
+    # word_path: str = os.getenv('WORD_PATH')
+    pdf_path: str = os.getenv('PDF_PATH')
+    main({
+        "contract_file": open(pdf_path, "rb").read(),
+        "file_name": "example.pdf",
+        "file_type": ".pdf"
+    })
