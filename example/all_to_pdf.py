@@ -64,6 +64,8 @@ def process_pdf(file_data):
     return pdf_bytes.getvalue(), text_content, page_info
 
 
+# ??????
+
 def process_word_to_pdf(file_data):
     """将Word转换为PDF并处理"""
     with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as word_file:
@@ -144,10 +146,18 @@ def process_image_to_pdf(file_data):
 
 
 if __name__ == '__main__':
-    # word_path: str = os.getenv('WORD_PATH')
-    pdf_path: str = os.getenv('PDF_PATH')
-    main({
-        "contract_file": open(pdf_path, "rb").read(),
-        "file_name": "example.pdf",
-        "file_type": ".pdf"
+    word_path: str = os.getenv('WORD_PATH')
+    res = main({
+        "contract_file": open(word_path, "rb").read(),
+        "file_name": "example.docx",
+        "file_type": ".docx"
     })
+
+    # pdf_path: str = os.getenv('PDF_PATH')
+    # res = main({
+    #     "contract_file": open(pdf_path, "rb").read(),
+    #     "file_name": "example.pdf",
+    #     "file_type": ".pdf"
+    # })
+
+    print(f"res: {res}")
