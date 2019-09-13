@@ -1,9 +1,47 @@
 import os
+from typing import List
 
 import fitz
 from dotenv import load_dotenv
 
 load_dotenv()
+
+COLOR_MAP = {
+    "high": fitz.utils.getColor("red"),
+    "middle": fitz.utils.getColor("orange"),
+    "low": fitz.utils.getColor("yellow")
+}
+
+
+class BaseAuditReport:
+    def __init__(self, content: str, issue_type: str = None, severity: str = None, suggestion: str = None,
+                 reasoning: str = None):
+        """
+        初始化实例
+        :param content: 有问题的具体文本内容（原文中的确切文字）
+        :param issue_type: 问题类型（如：条款不明确、风险条款、缺失信息、法律风险等）
+        :param severity: 问题严重程度（如：high、middle、low）
+        :param suggestion: 针对问题的建议（如：修改、补充、删除等）
+        :param reasoning: 问题的说明或原因（如：法律风险、合规性问题等）
+        """
+        self.content = content
+        self.issue_type = issue_type
+        self.severity = severity
+        self.suggestion = suggestion
+        self.reasoning = reasoning
+
+
+class PdfAuditReport(BaseAuditReport):
+    """Pdf审核报告类，用于存储和处理审核问题"""
+
+    def __init__(self, content: str, issue_type: str = None, severity: str = None, suggestion: str = None,
+                 reasoning: str = None, page: int = -1):
+        """
+        初始化实例
+        :param page: 问题所在的页码
+        """
+        super().__init__(content, issue_type, severity, suggestion, reasoning)
+        self.page = page
 
 
 def parse_document(file_path):
@@ -35,14 +73,10 @@ def highlight_issues_in_document(doc, text_blocks, issues):
         severity = issue["severity"]
 
         # 根据严重程度设置颜色
-        color_map = {
-            "高": fitz.utils.getColor("red"),
-            "中": fitz.utils.getColor("orange"),
-            "低": fitz.utils.getColor("yellow")
-        }
-        color = color_map.get(severity, fitz.utils.getColor("yellow"))
 
-        # 在文档中查找并高亮文本
+        color = COLOR_MAP.get(severity, fitz.utils.getColor("yellow"))
+
+        # 在文档中查找高亮文本
         for page_num in range(doc.page_count):
             page = highlighted_doc[page_num]
 
@@ -64,6 +98,14 @@ def highlight_issues_in_document(doc, text_blocks, issues):
     return highlighted_doc
 
 
+def add_highlight_to_pdf(pdf_path: str, issues: List[PdfAuditReport]):
+    doc = fitz.open(stream=pdf_path, filetype="pdf")
+
+
+
+    pass
+
+
 if __name__ == '__main__':
     pdf_path: str = os.getenv('PDF_PATH')
     text_blocks, doc = parse_document(pdf_path)
@@ -72,7 +114,7 @@ if __name__ == '__main__':
 
     new_doc = highlight_issues_in_document(doc, text_blocks, [{
         "content": "Because the database is in an inconsistent state, the usual tools to disassociate the IP no longer work",
-        "severity": "高",
+        "severity": "high",
         "issue_type": "IP地址关联问题",
         "suggestion": "请检查数据库状态并手动解除IP关联",
         "reasoning": "数据库状态不一致导致无法正常解除IP关联"
