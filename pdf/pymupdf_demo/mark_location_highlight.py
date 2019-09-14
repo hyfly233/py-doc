@@ -98,12 +98,39 @@ def highlight_issues_in_document(doc, text_blocks, issues):
     return highlighted_doc
 
 
-def add_highlight_to_pdf(pdf_path: str, issues: List[PdfAuditReport]):
+def add_highlight_to_pdf(pdf_path: str, issues: List[PdfAuditReport]) -> fitz.Document:
     doc = fitz.open(stream=pdf_path, filetype="pdf")
 
+    for issue in issues:
+        for page_num in range(doc.page_count):
+            page = doc[page_num]
 
+            # 搜索文本位置
+            text_instances = page.search_for(issue.content)
 
-    pass
+            for inst in text_instances:
+                # 添加高亮注释
+                highlight = page.add_highlight_annot(inst)
+                highlight.set_colors(stroke=COLOR_MAP.get(issue.severity, COLOR_MAP.get("low")))
+                highlight.set_info(
+                    title=f"审核问题 - {issue.severity}严重程度",
+                    content=f"问题类型: {issue.issue_type}\n"
+                            f"严重程度: {issue.severity}\n"
+                            f"建议: {issue.suggestion}\n"
+                            f"说明: {issue.reasoning}"
+                )
+                highlight.update()
+
+                if issue.severity == "high":
+                    # 如果是高严重度问题，添加红色边框
+                    border_rect = page.add_rect_annot(inst)
+                    border_rect.set_colors(stroke=COLOR_MAP["high"])
+                    border_rect.set_border(width=2)
+                    border_rect.update()
+
+    # doc.save("output/highlighted_document.pdf")
+    # doc.close()
+    return doc
 
 
 if __name__ == '__main__':
