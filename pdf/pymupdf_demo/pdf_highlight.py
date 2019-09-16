@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import fitz
@@ -44,7 +45,8 @@ class PdfAuditReport(BaseAuditReport):
 
 
 def add_highlight_to_pdf(pdf_path: str, issues: List[PdfAuditReport]) -> fitz.Document:
-    doc = fitz.open(stream=pdf_path, filetype="pdf")
+    # doc = fitz.open(stream=pdf_path, filetype="pdf")
+    doc = fitz.open(pdf_path)
 
     for issue in issues:
         for page_num in range(doc.page_count):
@@ -76,3 +78,29 @@ def add_highlight_to_pdf(pdf_path: str, issues: List[PdfAuditReport]) -> fitz.Do
     # doc.save("output/highlighted_document.pdf")
     # doc.close()
     return doc
+
+
+if __name__ == '__main__':
+    pdf_path: str = os.getenv('PDF_PATH')
+
+    highlighted_doc = add_highlight_to_pdf(pdf_path, [
+        PdfAuditReport(
+            content="Look for the vnet NIC",
+            issue_type="条款不明确",
+            severity="high",
+            suggestion="请修改为明确的条款",
+            reasoning="测试内容",
+            page=1
+        ),
+        PdfAuditReport(
+            content="Sending discover",
+            issue_type="条款不明确",
+            severity="low",
+            suggestion="测试有多个匹配项",
+            reasoning="此条款可能导致法律风险",
+            page=10
+        )
+    ])
+
+    highlighted_doc.save("output/highlighted_document.pdf")
+    highlighted_doc.close()
