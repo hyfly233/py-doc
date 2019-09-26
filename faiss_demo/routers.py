@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from document_processor import process_docx
-from faiss_index import add_document_to_index, search_index
+# from faiss_index import add_document_to_index, search_index
 
 api = Blueprint('api', __name__)
 
@@ -19,7 +19,7 @@ def add_document():
         return jsonify({'error': 'Failed to process document'}), 500
 
     # Add the document to the FAISS index
-    add_document_to_index(text)
+    # add_document_to_index(text)
     return jsonify({'message': 'Document added successfully'}), 201
 
 
@@ -30,5 +30,7 @@ def search():
         return jsonify({'error': 'No query provided'}), 400
 
     # Perform a search in the FAISS index
-    results = search_index(query)
-    return jsonify({'results': results}), 200
+    # results = search_index(query)
+    # return jsonify({'results': results}), 200
+
+    pass
