@@ -5,7 +5,10 @@ import time
 import faiss
 import numpy as np
 from docx import Document
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv()
 
 
 class DocxFaissSearchVLLM:
@@ -212,11 +215,14 @@ class DocxFaissSearchVLLM:
 
 
 def main():
-    # 创建搜索系统，指向本地 vLLM 服务
+    base_url = os.getenv("VLLM_BASE_URL")
+    api_key = os.getenv("OPENAI_API_KEY")
+    model_name = os.getenv("MODEL_NAME")
+
     search_system = DocxFaissSearchVLLM(
-        base_url=os.getenv("VLLM_BASE_URL"),
-        api_key=os.getenv("OPENAI_API_KEY"),
-        model_name=os.getenv("MODEL_NAME")
+        base_url=base_url,
+        api_key=api_key,
+        model_name=model_name
     )
 
     # 测试连接
