@@ -6,6 +6,9 @@ import faiss
 import numpy as np
 import requests
 from docx import Document
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class DocxFaissSearchOllama:
