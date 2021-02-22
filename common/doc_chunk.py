@@ -4,6 +4,19 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 
 
+# 验证分块是否正确覆盖了原文
+def verify_chunk_coverage(chunks):
+    for i in range(len(chunks) - 1):
+        current = chunks[i]
+        next_chunk = chunks[i + 1]
+
+        # 检查重叠是否正确
+        overlap_start = current.position.char_end - current.overlap_end
+        expected_next_start = next_chunk.position.char_start
+
+        if overlap_start != expected_next_start:
+            raise ValueError(f"分块{i}和{i + 1}之间重叠不正确")
+
 @dataclass
 class DocChunkPosition:
     """文档分块位置信息"""
