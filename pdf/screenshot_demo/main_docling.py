@@ -39,6 +39,7 @@ class TableLocation:
         self.name = name
         self.rect = rect
 
+
 def main():
     pdf_path: str = os.getenv('PDF_PATH')
     pdf_basename = os.path.splitext(os.path.basename(pdf_path))[0]

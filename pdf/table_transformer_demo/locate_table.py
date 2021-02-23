@@ -13,6 +13,7 @@ load_dotenv()
 
 model = TableTransformerForObjectDetection.from_pretrained("microsoft/table-transformer-detection")
 
+
 def main():
     # file_path = hf_hub_download(repo_id="nielsr/example-pdf", repo_type="dataset", filename="example_pdf.png")
     file_path = os.getenv('IMAGE_PATH')

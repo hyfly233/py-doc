@@ -11,6 +11,7 @@ COLOR_MAP = {
     "low": fitz.utils.getColor("yellow")
 }
 
+
 def parse_document(file_path):
     if file_path.endswith('.pdf'):
         doc = fitz.open(file_path)

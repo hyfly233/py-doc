@@ -17,6 +17,7 @@ def verify_chunk_coverage(chunks):
         if overlap_start != expected_next_start:
             raise ValueError(f"分块{i}和{i + 1}之间重叠不正确")
 
+
 @dataclass
 class DocChunkPosition:
     """文档分块位置信息"""
@@ -122,6 +123,7 @@ class DocChunk:
     def get_relative_position(self, absolute_pos: int) -> int:
         """将绝对位置转换为分块中的相对位置"""
         return absolute_pos - self.position.char_start
+
 
 @dataclass
 class Document:

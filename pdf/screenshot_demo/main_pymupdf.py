@@ -13,6 +13,7 @@ logging.basicConfig(
 )
 _log = logging.getLogger(__name__)
 
+
 def main():
     """
     从 PDF 中截取表格区域并保存为图片

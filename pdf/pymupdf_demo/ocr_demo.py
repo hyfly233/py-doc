@@ -1,10 +1,7 @@
 import os
 
 import fitz  # PyMuPDF
-import pymupdf.table
-from PIL import (Image)
 from dotenv import load_dotenv
-
 
 load_dotenv()
 

@@ -29,7 +29,6 @@ load_dotenv()
 
 PDF_PATH = os.getenv('PDF_PATH')
 
-
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
 )
@@ -48,6 +47,7 @@ def ollama_vlm_options(model: str, prompt: str):
         response_format=ResponseFormat.MARKDOWN,
     )
     return options
+
 
 def main():
     # 获取CPU核心数
@@ -189,8 +189,6 @@ def main():
                       )
 
         _log.info(f"###########################")
-
-
 
         # 将结果输出到 json 文件
         with (output_dir / f"{doc_filename}.json").open("w", encoding="utf-8") as file:
