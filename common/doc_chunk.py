@@ -294,6 +294,22 @@ class DocumentProcessor:
         """获取指定位置的行号"""
         return content[:position].count('\n') + 1
 
+    def _count_tokens(self, text: str) -> int:
+        """简单的token计数（可以替换为更精确的方法）"""
+        return len(text.split())
+
+    def _calculate_position(self, content: str, start: int, end: int) -> DocChunkPosition:
+        """计算位置信息"""
+        # 计算起始行号
+        lines_before_start = content[:start].count('\n')
+        lines_before_end = content[:end].count('\n')
+
+        return DocChunkPosition(
+            char_start=start,
+            char_end=end,
+            line_start=lines_before_start + 1,
+            line_end=lines_before_end + 1
+        )
 
 class ChunkVerifier:
     """分块验证工具"""
@@ -379,7 +395,7 @@ class ChunkVerifier:
 
 def create_sample_document():
     doc_id = str(uuid.uuid4())
-    file_path = os.getenv("WORD_PATH")
+    file_path = os.getenv("TXT_PATH")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
