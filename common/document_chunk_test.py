@@ -5,7 +5,7 @@ from typing import List, Dict
 
 from dotenv import load_dotenv
 
-from common.doc_chunk import Document, DocChunk, DocChunkPosition
+from common.document_chunk import Document, DocumentChunk, DocumentChunkPosition
 
 load_dotenv()
 
@@ -43,7 +43,7 @@ class DocumentProcessor:
 
         return doc
 
-    def _create_chunks(self, doc: Document) -> List[DocChunk]:
+    def _create_chunks(self, doc: Document) -> List[DocumentChunk]:
         """创建带重叠信息的文档分块"""
         content = doc.content
         chunks = []
@@ -81,7 +81,7 @@ class DocumentProcessor:
             chunk_content = content[actual_start:actual_end]
 
             # 计算位置信息
-            position = DocChunkPosition(
+            position = DocumentChunkPosition(
                 char_start=actual_start,
                 char_end=actual_end,
                 line_start=self._get_line_number(content, actual_start),
@@ -93,7 +93,7 @@ class DocumentProcessor:
             )
 
             # 创建分块
-            chunk = DocChunk(
+            chunk = DocumentChunk(
                 chunk_id=f"{doc.doc_id}_chunk_{chunk_index:04d}",
                 chunk_index=chunk_index,
                 content=chunk_content,
@@ -137,13 +137,13 @@ class DocumentProcessor:
         """简单的token计数（可以替换为更精确的方法）"""
         return len(text.split())
 
-    def _calculate_position(self, content: str, start: int, end: int) -> DocChunkPosition:
+    def _calculate_position(self, content: str, start: int, end: int) -> DocumentChunkPosition:
         """计算位置信息"""
         # 计算起始行号
         lines_before_start = content[:start].count('\n')
         lines_before_end = content[:end].count('\n')
 
-        return DocChunkPosition(
+        return DocumentChunkPosition(
             char_start=start,
             char_end=end,
             line_start=lines_before_start + 1,
@@ -155,7 +155,7 @@ class ChunkVerifier:
     """分块验证工具"""
 
     @staticmethod
-    def verify_chunk_integrity(chunks: List[DocChunk], original_content: str) -> Dict:
+    def verify_chunk_integrity(chunks: List[DocumentChunk], original_content: str) -> Dict:
         """验证分块完整性"""
         results = {
             "coverage_complete": True,
@@ -205,7 +205,7 @@ class ChunkVerifier:
         return results
 
     @staticmethod
-    def reconstruct_content(chunks: List[DocChunk]) -> str:
+    def reconstruct_content(chunks: List[DocumentChunk]) -> str:
         """从分块重构原始内容"""
         if not chunks:
             return ""
@@ -218,7 +218,7 @@ class ChunkVerifier:
         return "".join(content_parts)
 
     @staticmethod
-    def analyze_overlap_efficiency(chunks: List[DocChunk]) -> Dict:
+    def analyze_overlap_efficiency(chunks: List[DocumentChunk]) -> Dict:
         """分析重叠效率"""
         total_content = sum(chunk.position.content_length for chunk in chunks)
         total_overlap = sum(chunk.position.total_overlap for chunk in chunks)
@@ -246,6 +246,7 @@ def create_sample_document():
         file_path=file_path,
         file_checksum=hashlib.md5(content.encode()).hexdigest(),
         total_size=len(content),
+        file_extension_name=os.path.splitext(file_path)[1],
         content=content,
         chunk_size=2000,
         chunk_overlap=200,

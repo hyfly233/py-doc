@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 @dataclass
-class DocChunkPosition:
+class DocumentChunkPosition:
     """文档分块位置信息"""
     char_start: int = 0  # 内容实际起始位置
     char_end: int = 0  # 内容实际结束位置
@@ -53,12 +53,12 @@ class DocChunkPosition:
 
 
 @dataclass
-class DocChunk:
+class DocumentChunk:
     """文档分块类"""
     chunk_id: str  # 分块唯一标识
     chunk_index: int  # 分块序号（从0开始）
     content: str  # 完整内容（包含重叠部分）
-    position: DocChunkPosition  # 位置信息
+    position: DocumentChunkPosition  # 位置信息
     doc_id: str  # 所属文档ID
 
     # 分块配置信息
@@ -122,6 +122,7 @@ class Document:
     file_path: str  # 文件路径
     file_checksum: str  # 文件校验和
     total_size: int  # 文件总大小
+    file_extension_name: str  # 文件扩展名
 
     # 分块配置
     chunk_size: int = 2000  # 分块大小
@@ -129,7 +130,7 @@ class Document:
 
     # 文档信息
     content: Optional[str] = None  # 原始内容
-    chunks: Optional[List[DocChunk]] = None  # 分块列表
+    chunks: Optional[List[DocumentChunk]] = None  # 分块列表
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     metadata: Optional[Dict[str, Any]] = None
@@ -152,14 +153,14 @@ class Document:
         """获取分块数量"""
         return len(self.chunks)
 
-    def add_chunk(self, chunk: DocChunk):
+    def add_chunk(self, chunk: DocumentChunk):
         """添加分块"""
         if chunk.doc_id != self.doc_id:
             raise ValueError("分块不属于当前文档")
         self.chunks.append(chunk)
         self.updated_at = datetime.now()
 
-    def get_chunk_by_position(self, char_position: int) -> Optional[DocChunk]:
+    def get_chunk_by_position(self, char_position: int) -> Optional[DocumentChunk]:
         """根据字符位置获取分块"""
         for chunk in self.chunks:
             if (chunk.position.char_start <= char_position <=
