@@ -121,8 +121,8 @@ class Document:
     file_name: str  # 文件名
     file_path: str  # 文件路径
     file_checksum: str  # 文件校验和
-    total_size: int  # 文件总大小
     file_extension_name: str  # 文件扩展名
+    total_size: Optional[int] = None  # 文件总大小
 
     # 分块配置
     chunk_size: int = 2000  # 分块大小
