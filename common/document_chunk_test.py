@@ -5,7 +5,7 @@ from typing import List, Dict
 
 from dotenv import load_dotenv
 
-from common.document_chunk import Document, DocumentChunk, DocumentChunkPosition
+from common.document_chunk import BaseDocument, DocumentChunk, DocumentChunkPosition
 
 load_dotenv()
 
@@ -31,7 +31,7 @@ class DocumentProcessor:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
-    def process_document(self, doc: Document) -> Document:
+    def process_document(self, doc: BaseDocument) -> BaseDocument:
         """处理文档，生成分块"""
         if not doc.content:
             raise ValueError("文档内容为空")
@@ -43,7 +43,7 @@ class DocumentProcessor:
 
         return doc
 
-    def _create_chunks(self, doc: Document) -> List[DocumentChunk]:
+    def _create_chunks(self, doc: BaseDocument) -> List[DocumentChunk]:
         """创建带重叠信息的文档分块"""
         content = doc.content
         chunks = []
@@ -240,7 +240,7 @@ def create_sample_document():
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    doc = Document(
+    doc = BaseDocument(
         doc_id=doc_id,
         file_name=os.path.basename(file_path),
         file_path=file_path,

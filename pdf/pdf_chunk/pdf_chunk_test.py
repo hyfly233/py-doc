@@ -5,14 +5,14 @@ import fitz
 import pymupdf
 from dotenv import load_dotenv
 
-from common.document_chunk import Document
+from common.document_chunk import BaseDocument
 from common.utils import calculate_md5_file
 
 load_dotenv()
 
 
 
-def parse_document(doc: Document) -> Document | None:
+def parse_document(doc: BaseDocument) -> BaseDocument | None:
     if doc.file_extension_name == "pdf":
         pdf = pymupdf.open(file_path)
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     doc_id = str(uuid.uuid4())
     file_path = os.getenv("PDF_PATH")
 
-    document = Document(
+    document = BaseDocument(
         doc_id=doc_id,
         file_name=os.path.basename(file_path),
         file_path=file_path,

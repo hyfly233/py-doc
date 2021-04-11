@@ -115,7 +115,7 @@ class DocumentChunk:
 
 
 @dataclass
-class Document:
+class BaseDocument:
     """文档类"""
     doc_id: str  # 文档唯一标识
     file_name: str  # 文件名
