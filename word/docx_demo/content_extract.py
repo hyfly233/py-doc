@@ -11,17 +11,14 @@ def parse_document(file_path):
         doc = Document(file_path)
         text_blocks = []
         for i, para in enumerate(doc.paragraphs):
-            print("Paragraph Index:", i)
-            # print(f" 文本: {para.text[:50]} ...")
-            print(f" 文本: {para.text[:]}")
-            # pf = para.paragraph_format
-            # 获取段落格式信息
-            # print("Paragraph Format:", pf.__dict__)
             for run in para.runs:
                 text_blocks.append({
+                    "paragraph_index": i,
                     "text": run.text,
-                    "font": run.font.name,
-                    "size": run.font.size
+                    "font": {
+                        "name": run.font.name,
+                        "size": run.font.size
+                    }
                 })
         return text_blocks, doc
 
@@ -29,5 +26,4 @@ def parse_document(file_path):
 if __name__ == '__main__':
     word_path: str = os.getenv('WORD_PATH')
     text_blocks, doc = parse_document(word_path)
-    # print("text_blocks:", text_blocks)
-    print("doc:", doc)
+    print("text_blocks:", text_blocks)

@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from docx import Document
+import docx
 from dotenv import load_dotenv
 
 from common.document_chunk import BaseDocument
@@ -12,7 +12,7 @@ load_dotenv()
 
 def parse_document(doc: BaseDocument) -> BaseDocument | None:
     if doc.file_extension_name == "docx":
-        docx = Document(file_path)
+        docx_d = docx.Document(file_path)
 
         print(docx.comments)
 
