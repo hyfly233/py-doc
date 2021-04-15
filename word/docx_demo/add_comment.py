@@ -90,4 +90,4 @@ def add_comments(file_path, word):
 
 if __name__ == '__main__':
     word_path: str = os.getenv('WORD_PATH')
-    add_comment(word_path, "一个")
+    add_comments(word_path, "喵")
