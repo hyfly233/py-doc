@@ -26,14 +26,13 @@ class AnnotationConfig:
     font_color: Optional[Tuple[int, int, int]] = None  # 字体颜色
 
 
-def annotate_word_in_document(file_path: str, target_word: str, config: AnnotationConfig):
+def annotate_words_with_configs(file_path: str, word_configs: dict[str, AnnotationConfig]):
     """
-    在文档中标注指定词语
+    在文档中标注多个词语（为每个词语使用不同配置）
 
     Args:
         file_path: 源文档路径
-        target_word: 要标注的词语
-        config: 标注配置
+        word_configs: 词语和配置的字典 {词语: 配置}
     """
     if not file_path.endswith('.docx'):
         print("只支持 .docx 格式文件")
@@ -44,80 +43,109 @@ def annotate_word_in_document(file_path: str, target_word: str, config: Annotati
     new_file_path = f"{base_name}_标注版本.docx"
 
     doc = Document(file_path)
+    target_words = list(word_configs.keys())
 
     for i, paragraph in enumerate(doc.paragraphs):
         p_text = paragraph.text
-        if target_word in p_text:
+        # 检查段落是否包含任何目标词语
+        if any(word in p_text for word in target_words):
             print(f"处理段落 {i}: {p_text}")
+
+            # 按词语长度排序，先处理长词语避免被短词语影响
+            sorted_words = sorted(target_words, key=len, reverse=True)
 
             # 从后往前处理，避免索引变化问题
             for j in range(len(paragraph.runs) - 1, -1, -1):
                 run = paragraph.runs[j]
                 run_text = run.text
-                if target_word in run_text:
-                    # 保存原run的格式和位置
-                    original_font = run.font
-                    run_element = run._element
-                    parent = run_element.getparent()
 
-                    # 按目标词拆分文本
-                    parts = run_text.split(target_word)
-
-                    # 移除原run
-                    parent.remove(run_element)
-
-                    # 在原位置插入新的runs
-                    insert_position = j
-                    for k, part in enumerate(parts):
-                        if part:
-                            # 创建普通文本run
-                            new_run = paragraph.add_run(part)
-                            _copy_font_formatting(original_font, new_run.font)
-
-                            # 移动到正确位置
-                            new_element = new_run._element
-                            parent.remove(new_element)
-                            parent.insert(insert_position, new_element)
-                            insert_position += 1
-
-                        # 在非最后部分后插入标注的目标词
-                        if k < len(parts) - 1:
-                            # 构建标注文本
-                            annotated_word = target_word
-                            if config.emphasize:
-                                annotated_word = f"{config.emphasize_symbols[0]}{target_word}{config.emphasize_symbols[1]}"
-
-                            # 创建标注run
-                            target_run = paragraph.add_run(annotated_word)
-                            _copy_font_formatting(original_font, target_run.font)
-
-                            # 应用字体颜色
-                            if config.font_color:
-                                target_run.font.color.rgb = RGBColor(*config.font_color)
-
-                            # 应用高亮
-                            if config.highlight:
-                                target_run.font.highlight_color = _rgb_to_highlight_color(config.highlight_color)
-
-                            # 添加注释
-                            if config.add_comment:
-                                comment_text = config.comment_text or f"标注词语: {target_word}"
-                                doc.add_comment(
-                                    runs=[target_run],
-                                    text=comment_text,
-                                    author=config.comment_author,
-                                    initials=config.comment_initials
-                                )
-
-                            # 移动到正确位置
-                            target_element = target_run._element
-                            parent.remove(target_element)
-                            parent.insert(insert_position, target_element)
-                            insert_position += 1
+                # 检查当前run是否包含任何目标词语
+                for word in sorted_words:
+                    if word in run_text:
+                        config = word_configs[word]
+                        _process_single_word_in_run(paragraph, j, run, word, config, doc)
+                        break  # 处理完一个词语后跳出，避免重复处理
 
     # 保存新文档
     doc.save(new_file_path)
     print(f"标注完成，新文件已保存为: {new_file_path}")
+
+
+def _process_single_word_in_run(paragraph, run_index, run, target_word, config, doc):
+    """处理run中的单个目标词语"""
+    original_font = run.font
+    run_element = run._element
+    parent = run_element.getparent()
+    run_text = run.text
+
+    # 按目标词拆分文本
+    parts = run_text.split(target_word)
+
+    # 移除原run
+    parent.remove(run_element)
+
+    # 在原位置插入新的runs
+    insert_position = run_index
+    for k, part in enumerate(parts):
+        if part:
+            # 创建普通文本run
+            new_run = paragraph.add_run(part)
+            _copy_font_formatting(original_font, new_run.font)
+
+            # 移动到正确位置
+            new_element = new_run._element
+            parent.remove(new_element)
+            parent.insert(insert_position, new_element)
+            insert_position += 1
+
+        # 在非最后部分后插入标注的目标词
+        if k < len(parts) - 1:
+            # 构建标注文本
+            annotated_word = target_word
+            if config.emphasize:
+                annotated_word = f"{config.emphasize_symbols[0]}{target_word}{config.emphasize_symbols[1]}"
+
+            # 创建标注run
+            target_run = paragraph.add_run(annotated_word)
+            _copy_font_formatting(original_font, target_run.font)
+
+            # 应用字体颜色
+            if config.font_color:
+                target_run.font.color.rgb = RGBColor(*config.font_color)
+
+            # 应用高亮
+            if config.highlight:
+                target_run.font.highlight_color = _rgb_to_highlight_color(config.highlight_color)
+
+            # 添加注释
+            if config.add_comment:
+                comment_text = config.comment_text or f"标注词语: {target_word}"
+                doc.add_comment(
+                    runs=[target_run],
+                    text=comment_text,
+                    author=config.comment_author,
+                    initials=config.comment_initials
+                )
+
+            # 移动到正确位置
+            target_element = target_run._element
+            parent.remove(target_element)
+            parent.insert(insert_position, target_element)
+            insert_position += 1
+
+
+def annotate_multiple_words_same_config(file_path: str, target_words: list[str], config: AnnotationConfig):
+    """
+    在文档中标注多个词语（使用相同配置）
+
+    Args:
+        file_path: 源文档路径
+        target_words: 要标注的词语列表
+        config: 标注配置
+    """
+    # 创建相同配置的字典
+    word_configs = {word: config for word in target_words}
+    annotate_words_with_configs(file_path, word_configs)
 
 
 def _copy_font_formatting(source_font, target_font):
@@ -184,16 +212,21 @@ def create_full_annotation_config(comment_text: str = "",
 if __name__ == '__main__':
     word_path: str = os.getenv('WORD_PATH')
 
-    # 示例1: 只添加红色突出显示
-    config1 = create_emphasize_config(color=(255, 0, 0))
-    annotate_word_in_document(word_path, "喵", config1)
+    # 方案1: 多个词语使用不同配置
+    word_configs = {
+        "公司": create_highlight_config(color=(255, 255, 0)),  # 黄色高亮
+        "喵": create_emphasize_config(symbols=("「", "」"), color=(255, 0, 0)),  # 红色突出显示
+        "合同": create_comment_config(comment_text="法律文件", author="法务"),  # 只添加注释
+        "卖方": create_full_annotation_config(
+            comment_text="重要角色标识",
+            author="审核员",
+            highlight_color=(0, 255, 0),  # 绿色高亮
+            font_color=(0, 0, 255),  # 蓝色字体
+            symbols=("【", "】")  # 方括号
+        ),
+    }
+    annotate_words_with_configs(word_path, word_configs)
 
-    # 示例2: 完整标注 (注释+高亮+突出显示)
-    # config2 = create_full_annotation_config(
-    #     comment_text="这是一个特殊的词语",
-    #     author="审核员",
-    #     highlight_color=(255, 255, 0),  # 黄色高亮
-    #     font_color=(255, 0, 0),         # 红色字体
-    #     symbols=("【", "】")            # 方括号
-    # )
-    # annotate_word_in_document(word_path, "公司", config2)
+    # 方案2: 多个词语使用相同配置
+    # same_config = create_emphasize_config(color=(255, 0, 0))
+    # annotate_multiple_words_same_config(word_path, ["甲方", "乙方"], same_config)
