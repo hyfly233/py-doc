@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 
 from docx import Document
-from docx.shared import RGBColor
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,12 +17,12 @@ class AnnotationConfig:
     comment_initials: str = "标"  # 作者简称
 
     highlight: bool = False  # 是否高亮
-    highlight_color: Tuple[int, int, int] = (255, 255, 0)  # 高亮颜色 (黄色)
+    highlight_color: str = "yellow"  # 高亮颜色名称
 
     emphasize: bool = False  # 是否突出显示 (添加括号)
     emphasize_symbols: Tuple[str, str] = ("「", "」")  # 突出显示符号
 
-    font_color: Optional[Tuple[int, int, int]] = None  # 字体颜色
+    font_color: Optional[str] = None  # 字体颜色名称
 
 
 def annotate_words_with_configs(file_path: str, word_configs: dict[str, AnnotationConfig]):
@@ -54,17 +53,27 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
             # 按词语长度排序，先处理长词语避免被短词语影响
             sorted_words = sorted(target_words, key=len, reverse=True)
 
-            # 从后往前处理，避免索引变化问题
-            for j in range(len(paragraph.runs) - 1, -1, -1):
-                run = paragraph.runs[j]
-                run_text = run.text
+            # 需要重复处理直到没有变化，因为一个run可能包含多个目标词语
+            changed = True
+            while changed:
+                changed = False
+                # 从后往前处理，避免索引变化问题
+                for j in range(len(paragraph.runs) - 1, -1, -1):
+                    if j >= len(paragraph.runs):  # 防止索引越界
+                        continue
 
-                # 检查当前run是否包含任何目标词语
-                for word in sorted_words:
-                    if word in run_text:
-                        config = word_configs[word]
-                        _process_single_word_in_run(paragraph, j, run, word, config, doc)
-                        break  # 处理完一个词语后跳出，避免重复处理
+                    run = paragraph.runs[j]
+                    run_text = run.text
+
+                    # 检查当前run是否包含任何目标词语
+                    for word in sorted_words:
+                        if word in run_text:
+                            _process_single_word_in_run(paragraph, j, run, word, word_configs[word], doc)
+                            changed = True
+                            break  # 处理完一个词语后跳出内层循环，重新开始
+
+                    if changed:
+                        break  # 如果有变化，重新开始外层循环
 
     # 保存新文档
     doc.save(new_file_path)
@@ -77,6 +86,10 @@ def _process_single_word_in_run(paragraph, run_index, run, target_word, config, 
     run_element = run._element
     parent = run_element.getparent()
     run_text = run.text
+
+    # 如果不包含目标词语，直接返回
+    if target_word not in run_text:
+        return
 
     # 按目标词拆分文本
     parts = run_text.split(target_word)
@@ -111,11 +124,11 @@ def _process_single_word_in_run(paragraph, run_index, run, target_word, config, 
 
             # 应用字体颜色
             if config.font_color:
-                target_run.font.color.rgb = RGBColor(*config.font_color)
+                _apply_font_color(target_run, config.font_color)
 
             # 应用高亮
             if config.highlight:
-                target_run.font.highlight_color = _rgb_to_highlight_color(config.highlight_color)
+                _apply_highlight_color(target_run, config.highlight_color)
 
             # 添加注释
             if config.add_comment:
@@ -157,25 +170,46 @@ def _copy_font_formatting(source_font, target_font):
     target_font.underline = source_font.underline
 
 
-def _rgb_to_highlight_color(rgb: Tuple[int, int, int]):
-    """将RGB颜色转换为Word高亮颜色（简化版本）"""
+def _apply_highlight_color(run, color_name: str):
+    """应用高亮颜色（使用颜色名称）"""
     from docx.enum.text import WD_COLOR_INDEX
 
-    # 简单的颜色映射
     color_map = {
-        (255, 255, 0): WD_COLOR_INDEX.YELLOW,  # 黄色
-        (255, 0, 0): WD_COLOR_INDEX.RED,  # 红色
-        (0, 255, 0): WD_COLOR_INDEX.BRIGHT_GREEN,  # 绿色
-        (0, 0, 255): WD_COLOR_INDEX.BLUE,  # 蓝色
-        (255, 0, 255): WD_COLOR_INDEX.PINK,  # 粉色
-        (0, 255, 255): WD_COLOR_INDEX.TURQUOISE,  # 青色
+        "yellow": WD_COLOR_INDEX.YELLOW,
+        "red": WD_COLOR_INDEX.RED,
+        "green": WD_COLOR_INDEX.BRIGHT_GREEN,
+        "blue": WD_COLOR_INDEX.BLUE,
+        "pink": WD_COLOR_INDEX.PINK,
+        "cyan": WD_COLOR_INDEX.TURQUOISE,
+        "gray": WD_COLOR_INDEX.GRAY_25,
+        "purple": WD_COLOR_INDEX.VIOLET,
+        "lime": WD_COLOR_INDEX.BRIGHT_GREEN,
     }
 
-    return color_map.get(rgb, WD_COLOR_INDEX.YELLOW)
+    run.font.highlight_color = color_map.get(color_name.lower(), WD_COLOR_INDEX.YELLOW)
+
+
+def _apply_font_color(run, color_name: str):
+    """应用字体颜色（使用颜色名称）"""
+    from docx.shared import RGBColor
+
+    color_map = {
+        "red": RGBColor(255, 0, 0),
+        "blue": RGBColor(0, 0, 255),
+        "green": RGBColor(0, 128, 0),
+        "purple": RGBColor(128, 0, 128),
+        "brown": RGBColor(165, 42, 42),
+        "black": RGBColor(0, 0, 0),
+        "gray": RGBColor(128, 128, 128),
+        "pink": RGBColor(255, 192, 203),
+        "yellow": RGBColor(255, 255, 0),
+    }
+
+    run.font.color.rgb = color_map.get(color_name.lower(), RGBColor(0, 0, 0))
 
 
 # 预设配置
-def create_highlight_config(color: Tuple[int, int, int] = (255, 255, 0)) -> AnnotationConfig:
+def create_highlight_config(color: str = "yellow") -> AnnotationConfig:
     """创建高亮配置"""
     return AnnotationConfig(highlight=True, highlight_color=color)
 
@@ -186,15 +220,15 @@ def create_comment_config(comment_text: str = "", author: str = "标注者") -> 
 
 
 def create_emphasize_config(symbols: Tuple[str, str] = ("「", "」"),
-                            color: Tuple[int, int, int] = (255, 0, 0)) -> AnnotationConfig:
+                            color: str = "red") -> AnnotationConfig:
     """创建突出显示配置"""
     return AnnotationConfig(emphasize=True, emphasize_symbols=symbols, font_color=color)
 
 
 def create_full_annotation_config(comment_text: str = "",
                                   author: str = "标注者",
-                                  highlight_color: Tuple[int, int, int] = (255, 255, 0),
-                                  font_color: Tuple[int, int, int] = (255, 0, 0),
+                                  highlight_color: str = "yellow",
+                                  font_color: str = "red",
                                   symbols: Tuple[str, str] = ("「", "」")) -> AnnotationConfig:
     """创建完整标注配置（注释+高亮+突出显示）"""
     return AnnotationConfig(
@@ -214,16 +248,16 @@ if __name__ == '__main__':
 
     # 方案1: 多个词语使用不同配置
     word_configs = {
-        "公司": create_highlight_config(color=(255, 255, 0)),  # 黄色高亮
-        "喵": create_emphasize_config(symbols=("「", "」"), color=(255, 0, 0)),  # 红色突出显示
-        "合同": create_comment_config(comment_text="法律文件", author="法务"),  # 只添加注释
-        "卖方": create_full_annotation_config(
-            comment_text="重要角色标识",
-            author="审核员",
-            highlight_color=(0, 255, 0),  # 绿色高亮
-            font_color=(0, 0, 255),  # 蓝色字体
-            symbols=("【", "】")  # 方括号
-        ),
+        # "公司": create_highlight_config(color="yellow"),  # 黄色高亮
+        "喵": create_emphasize_config(symbols=("「", "」"), color="red"),  # 红色突出显示
+        # "合同": create_comment_config(comment_text="法律文件", author="法务"),  # 只添加注释
+        # "卖方": create_full_annotation_config(
+        #     comment_text="重要角色标识",
+        #     author="审核员",
+        #     highlight_color = "green",  # 绿色高亮
+        #     font_color = "blue"  # 蓝色字体
+        #     symbols=("【", "】")  # 方括号
+        # ),
     }
     annotate_words_with_configs(word_path, word_configs)
 
