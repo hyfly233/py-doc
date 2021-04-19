@@ -53,25 +53,27 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
             # 按词语长度排序，先处理长词语避免被短词语影响
             sorted_words = sorted(target_words, key=len, reverse=True)
 
-            # 处理每个目标词语
-            for word in sorted_words:
-                # 重复处理直到该词语不再出现
-                word_found = True
-                while word_found:
-                    word_found = False
-                    # 从后往前处理，避免索引变化问题
-                    for j in range(len(paragraph.runs) - 1, -1, -1):
-                        if j >= len(paragraph.runs):  # 防止索引越界
-                            continue
+            # 需要重复处理直到没有变化，因为一个run可能包含多个目标词语
+            changed = True
+            while changed:
+                changed = False
+                # 从后往前处理，避免索引变化问题
+                for j in range(len(paragraph.runs) - 1, -1, -1):
+                    if j >= len(paragraph.runs):  # 防止索引越界
+                        continue
 
-                        run = paragraph.runs[j]
-                        run_text = run.text
+                    run = paragraph.runs[j]
+                    run_text = run.text
 
-                        # 检查当前run是否包含目标词语
+                    # 检查当前run是否包含任何目标词语
+                    for word in sorted_words:
                         if word in run_text:
                             _process_single_word_in_run(paragraph, j, run, word, word_configs[word], doc)
-                            word_found = True
-                            break  # 处理完一个run后跳出，重新开始
+                            changed = True
+                            break  # 处理完一个词语后跳出内层循环，重新开始
+
+                    if changed:
+                        break  # 如果有变化，重新开始外层循环
 
     # 保存新文档
     doc.save(new_file_path)
@@ -79,7 +81,7 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
 
 
 def _process_single_word_in_run(paragraph, run_index, run, target_word, config, doc):
-    """处理run中的单个目标词语（只处理第一个匹配的词语）"""
+    """处理run中的单个目标词语"""
     original_font = run.font
     run_element = run._element
     parent = run_element.getparent()
@@ -89,71 +91,60 @@ def _process_single_word_in_run(paragraph, run_index, run, target_word, config, 
     if target_word not in run_text:
         return
 
-    # 找到第一个目标词的位置
-    index = run_text.find(target_word)
-    if index == -1:
-        return
-
-    # 分成三部分：前缀、目标词、后缀
-    prefix = run_text[:index]
-    suffix = run_text[index + len(target_word):]
+    # 按目标词拆分文本
+    parts = run_text.split(target_word)
 
     # 移除原run
     parent.remove(run_element)
 
     # 在原位置插入新的runs
     insert_position = run_index
+    for k, part in enumerate(parts):
+        if part:
+            # 创建普通文本run
+            new_run = paragraph.add_run(part)
+            _copy_font_formatting(original_font, new_run.font)
 
-    # 插入前缀（如果存在）
-    if prefix:
-        prefix_run = paragraph.add_run(prefix)
-        _copy_font_formatting(original_font, prefix_run.font)
+            # 移动到正确位置
+            new_element = new_run._element
+            parent.remove(new_element)
+            parent.insert(insert_position, new_element)
+            insert_position += 1
 
-        prefix_element = prefix_run._element
-        parent.remove(prefix_element)
-        parent.insert(insert_position, prefix_element)
-        insert_position += 1
+        # 在非最后部分后插入标注的目标词
+        if k < len(parts) - 1:
+            # 构建标注文本
+            annotated_word = target_word
+            if config.emphasize:
+                annotated_word = f"{config.emphasize_symbols[0]}{target_word}{config.emphasize_symbols[1]}"
 
-    # 插入标注的目标词
-    annotated_word = target_word
-    if config.emphasize:
-        annotated_word = f"{config.emphasize_symbols[0]}{target_word}{config.emphasize_symbols[1]}"
+            # 创建标注run
+            target_run = paragraph.add_run(annotated_word)
+            _copy_font_formatting(original_font, target_run.font)
 
-    target_run = paragraph.add_run(annotated_word)
-    _copy_font_formatting(original_font, target_run.font)
+            # 应用字体颜色
+            if config.font_color:
+                _apply_font_color(target_run, config.font_color)
 
-    # 应用字体颜色
-    if config.font_color:
-        _apply_font_color(target_run, config.font_color)
+            # 应用高亮
+            if config.highlight:
+                _apply_highlight_color(target_run, config.highlight_color)
 
-    # 应用高亮
-    if config.highlight:
-        _apply_highlight_color(target_run, config.highlight_color)
+            # 添加注释
+            if config.add_comment:
+                comment_text = config.comment_text or f"标注词语: {target_word}"
+                doc.add_comment(
+                    runs=[target_run],
+                    text=comment_text,
+                    author=config.comment_author,
+                    initials=config.comment_initials
+                )
 
-    # 添加注释
-    if config.add_comment:
-        comment_text = config.comment_text or f"标注词语: {target_word}"
-        doc.add_comment(
-            runs=[target_run],
-            text=comment_text,
-            author=config.comment_author,
-            initials=config.comment_initials
-        )
-
-    # 移动到正确位置
-    target_element = target_run._element
-    parent.remove(target_element)
-    parent.insert(insert_position, target_element)
-    insert_position += 1
-
-    # 插入后缀（如果存在）
-    if suffix:
-        suffix_run = paragraph.add_run(suffix)
-        _copy_font_formatting(original_font, suffix_run.font)
-
-        suffix_element = suffix_run._element
-        parent.remove(suffix_element)
-        parent.insert(insert_position, suffix_element)
+            # 移动到正确位置
+            target_element = target_run._element
+            parent.remove(target_element)
+            parent.insert(insert_position, target_element)
+            insert_position += 1
 
 
 def annotate_multiple_words_same_config(file_path: str, target_words: list[str], config: AnnotationConfig):
