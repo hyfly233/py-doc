@@ -73,6 +73,7 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
                             break  # 处理完一个词语后跳出内层循环，重新开始
 
                     if changed:
+                        changed = False
                         break  # 如果有变化，重新开始外层循环
 
     # 保存新文档
