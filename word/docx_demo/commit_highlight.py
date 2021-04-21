@@ -249,16 +249,15 @@ if __name__ == '__main__':
 
     # 方案1: 多个词语使用不同配置
     word_configs = {
-        # "公司": create_highlight_config(color="yellow"),  # 黄色高亮
+        "公司": create_highlight_config(color="yellow"),  # 黄色高亮
         "喵": create_emphasize_config(symbols=("「", "」"), color="red"),  # 红色突出显示
-        # "合同": create_comment_config(comment_text="法律文件", author="法务"),  # 只添加注释
-        # "卖方": create_full_annotation_config(
-        #     comment_text="重要角色标识",
-        #     author="审核员",
-        #     highlight_color = "green",  # 绿色高亮
-        #     font_color = "blue"  # 蓝色字体
-        #     symbols=("【", "】")  # 方括号
-        # ),
+        "卖方": create_full_annotation_config(
+            comment_text="重要角色标识",
+            author="审核员",
+            highlight_color="green",  # 绿色高亮
+            font_color="blue",  # 蓝色字体
+            symbols=("【", "】")  # 方括号
+        ),
     }
     annotate_words_with_configs(word_path, word_configs)
 
