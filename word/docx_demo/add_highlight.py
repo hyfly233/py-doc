@@ -9,25 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def add_highlight(file_path, word):
-    if file_path.endswith('.docx'):
-        doc = Document(file_path)
-        paragraph = doc.add_paragraph("这是一个新的段落。")
-
-        for run in paragraph.runs:
-            run_text = run.text
-            print(f"Run text: {run_text}")
-
-            if word in run_text:
-                # 直接修改run的文本，用特殊格式标记目标词语
-                highlighted_text = run_text.replace(word, f"【{word}】")
-                run.text = highlighted_text
-                run.font.color.rgb = RGBColor(255, 0, 0)
-                break
-
-        doc.save(file_path)
-
-
 def copy_font_format(source_font, target_font):
     """复制字体格式"""
     try:
