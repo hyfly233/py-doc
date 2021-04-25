@@ -47,14 +47,14 @@ def add_highlights(file_path: str, words: List[str]):
     sorted_words = sorted(words, key=len, reverse=True)
 
     for i, paragraph in enumerate(doc.paragraphs):
-        p_text = paragraph.text
+        full_text = paragraph.text
 
         # 检查是否包含任何目标词语
-        has_target_words = any(word in p_text for word in sorted_words)
+        has_target_words = any(word in full_text for word in sorted_words)
         if not has_target_words:
             continue
 
-        print(f"index: {i}, original text: {p_text}")
+        print(f"index: {i}, original text: {full_text}")
 
         # 创建字符到格式的映射
         char_formats = []
@@ -65,9 +65,6 @@ def add_highlights(file_path: str, words: List[str]):
             for char in run_text:
                 char_formats.append(run.font)
                 char_index += 1
-
-        # 拼接完整的段落文本
-        full_text = paragraph.text
 
         # 构建正则表达式，匹配所有目标词语
         pattern = '|'.join(re.escape(word) for word in sorted_words)
