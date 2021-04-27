@@ -141,4 +141,4 @@ def add_comments(file_path: str, words: List[str]):
 
 if __name__ == '__main__':
     word_path: str = os.getenv('WORD_PATH')
-    add_comments(word_path, ["喵", "公司", "北京"])
+    add_comments(word_path, ["喵", "公司", "北京", "喵喵公司"])
