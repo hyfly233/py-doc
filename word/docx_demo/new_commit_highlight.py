@@ -1,6 +1,7 @@
 import os
+import re
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from docx import Document
 from dotenv import load_dotenv
@@ -25,6 +26,26 @@ class AnnotationConfig:
     font_color: Optional[str] = None  # 字体颜色名称
 
 
+def copy_font_format(source_font, target_font):
+    """复制字体格式"""
+    try:
+        if source_font.name:
+            target_font.name = source_font.name
+        if source_font.size:
+            target_font.size = source_font.size
+        if source_font.bold is not None:
+            target_font.bold = source_font.bold
+        if source_font.italic is not None:
+            target_font.italic = source_font.italic
+        if source_font.underline is not None:
+            target_font.underline = source_font.underline
+        if source_font.color.rgb:
+            # 颜色由调用方决定，这里不复制原颜色
+            pass
+    except:
+        pass
+
+
 def annotate_words_with_configs(file_path: str, word_configs: dict[str, AnnotationConfig]):
     """
     在文档中标注多个词语（为每个词语使用不同配置）
@@ -44,111 +65,130 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
     doc = Document(file_path)
     target_words = list(word_configs.keys())
 
+    if not target_words:
+        print("没有提供任何词语进行标注")
+        return
+
+    # 按词语长度降序排序，优先处理长词，避免短词干扰长词的匹配
+    sorted_words = sorted(target_words, key=len, reverse=True)
+
     for i, paragraph in enumerate(doc.paragraphs):
-        p_text = paragraph.text
-        # 检查段落是否包含任何目标词语
-        if any(word in p_text for word in target_words):
-            print(f"处理段落 {i}: {p_text}")
+        full_text = paragraph.text
 
-            # 按词语长度排序，先处理长词语避免被短词语影响
-            sorted_words = sorted(target_words, key=len, reverse=True)
+        # 检查是否包含任何目标词语
+        has_target_words = any(word in full_text for word in sorted_words)
+        if not has_target_words:
+            continue
 
-            # 需要重复处理直到没有变化，因为一个run可能包含多个目标词语
-            changed = True
-            while changed:
-                changed = False
-                # 从后往前处理，避免索引变化问题
-                for j in range(len(paragraph.runs) - 1, -1, -1):
-                    if j >= len(paragraph.runs):  # 防止索引越界
-                        continue
+        print(f"index: {i}, original text: {full_text}")
 
-                    run = paragraph.runs[j]
-                    run_text = run.text
+        # 创建字符到格式的映射
+        char_formats = []
+        char_index = 0
 
-                    # 检查当前run是否包含任何目标词语
-                    for word in sorted_words:
-                        if word in run_text:
-                            _process_single_word_in_run(paragraph, j, run, word, word_configs[word], doc)
-                            changed = True
-                            break  # 处理完一个词语后跳出内层循环，重新开始
+        for run in paragraph.runs:
+            run_text = run.text
+            for char in run_text:
+                char_formats.append(run.font)
+                char_index += 1
 
-                    if changed:
-                        changed = False
-                        break  # 如果有变化，重新开始外层循环
+        # 构建正则表达式，匹配所有目标词语
+        pattern = '|'.join(re.escape(word) for word in sorted_words)
+
+        # 分割文本，保留分隔符
+        parts = re.split(f'({pattern})', full_text)
+
+        # 清空段落的所有runs
+        for run in paragraph.runs:
+            run.clear()
+
+        # 移除所有runs
+        while len(paragraph.runs) > 0:
+            paragraph._element.remove(paragraph.runs[0]._element)
+
+        # 重新构建段落内容
+        current_pos = 0
+        for part in parts:
+            if not part:  # 跳过空字符串
+                continue
+
+            if part in sorted_words:
+                config = word_configs[part]
+
+                # 构建标注文本
+                annotated_word = part
+                if config.emphasize:
+                    annotated_word = f"{config.emphasize_symbols[0]}{part}{config.emphasize_symbols[1]}"
+
+                # 添加标注的目标词
+                target_run = paragraph.add_run(annotated_word)
+
+                # 继承原文字的格式（除了颜色）
+                if current_pos < len(char_formats):
+                    source_font = char_formats[current_pos]
+                    copy_font_format(source_font, target_run.font)
+
+                # 应用字体颜色
+                if config.font_color:
+                    _apply_font_color(target_run, config.font_color)
+
+                # 应用高亮
+                if config.highlight:
+                    _apply_highlight_color(target_run, config.highlight_color)
+
+                # 添加注释
+                if config.add_comment:
+                    try:
+                        comment_text = config.comment_text or f"标注词语: {part}"
+                        doc.add_comment(
+                            runs=[target_run],
+                            text=comment_text,
+                            author=config.comment_author,
+                            initials=config.comment_initials
+                        )
+                    except Exception as e:
+                        print(f"添加注释失败: {e}")
+            else:
+                # 对于普通文本，按字符重建，保持原有格式
+                start_pos = current_pos
+                for char_idx, char in enumerate(part):
+                    format_idx = start_pos + char_idx
+                    if format_idx < len(char_formats):
+                        # 为每个字符创建单独的run（如果格式不同）
+                        if char_idx == 0 or (
+                                format_idx > 0 and char_formats[format_idx] != char_formats[format_idx - 1]):
+                            # 创建新的run
+                            char_run = paragraph.add_run(char)
+                            copy_font_format(char_formats[format_idx], char_run.font)
+                            # 保持原有颜色
+                            if char_formats[format_idx].color.rgb:
+                                char_run.font.color.rgb = char_formats[format_idx].color.rgb
+                        else:
+                            # 添加到最后一个run
+                            if paragraph.runs:
+                                paragraph.runs[-1].text += char
+                    else:
+                        # 如果超出了格式范围，使用最后一个可用格式
+                        if char_idx == 0:
+                            char_run = paragraph.add_run(char)
+                            if char_formats:
+                                copy_font_format(char_formats[-1], char_run.font)
+                                if char_formats[-1].color.rgb:
+                                    char_run.font.color.rgb = char_formats[-1].color.rgb
+                        else:
+                            if paragraph.runs:
+                                paragraph.runs[-1].text += char
+
+            current_pos += len(part)
+
+        print(f"index: {i}, processed text: {paragraph.text}")
 
     # 保存新文档
     doc.save(new_file_path)
     print(f"标注完成，新文件已保存为: {new_file_path}")
 
 
-def _process_single_word_in_run(paragraph, run_index, run, target_word, config, doc):
-    """处理run中的单个目标词语"""
-    original_font = run.font
-    run_element = run._element
-    parent = run_element.getparent()
-    run_text = run.text
-
-    # 如果不包含目标词语，直接返回
-    if target_word not in run_text:
-        return
-
-    # 按目标词拆分文本
-    parts = run_text.split(target_word)
-
-    # 移除原run
-    parent.remove(run_element)
-
-    # 在原位置插入新的runs
-    insert_position = run_index
-    for k, part in enumerate(parts):
-        if part:
-            # 创建普通文本run
-            new_run = paragraph.add_run(part)
-            _copy_font_formatting(original_font, new_run.font)
-
-            # 移动到正确位置
-            new_element = new_run._element
-            parent.remove(new_element)
-            parent.insert(insert_position, new_element)
-            insert_position += 1
-
-        # 在非最后部分后插入标注的目标词
-        if k < len(parts) - 1:
-            # 构建标注文本
-            annotated_word = target_word
-            if config.emphasize:
-                annotated_word = f"{config.emphasize_symbols[0]}{target_word}{config.emphasize_symbols[1]}"
-
-            # 创建标注run
-            target_run = paragraph.add_run(annotated_word)
-            _copy_font_formatting(original_font, target_run.font)
-
-            # 应用字体颜色
-            if config.font_color:
-                _apply_font_color(target_run, config.font_color)
-
-            # 应用高亮
-            if config.highlight:
-                _apply_highlight_color(target_run, config.highlight_color)
-
-            # 添加注释
-            if config.add_comment:
-                comment_text = config.comment_text or f"标注词语: {target_word}"
-                doc.add_comment(
-                    runs=[target_run],
-                    text=comment_text,
-                    author=config.comment_author,
-                    initials=config.comment_initials
-                )
-
-            # 移动到正确位置
-            target_element = target_run._element
-            parent.remove(target_element)
-            parent.insert(insert_position, target_element)
-            insert_position += 1
-
-
-def annotate_multiple_words_same_config(file_path: str, target_words: list[str], config: AnnotationConfig):
+def annotate_multiple_words_same_config(file_path: str, target_words: List[str], config: AnnotationConfig):
     """
     在文档中标注多个词语（使用相同配置）
 
@@ -160,15 +200,6 @@ def annotate_multiple_words_same_config(file_path: str, target_words: list[str],
     # 创建相同配置的字典
     word_configs = {word: config for word in target_words}
     annotate_words_with_configs(file_path, word_configs)
-
-
-def _copy_font_formatting(source_font, target_font):
-    """复制字体格式"""
-    target_font.name = source_font.name
-    target_font.size = source_font.size
-    target_font.bold = source_font.bold
-    target_font.italic = source_font.italic
-    target_font.underline = source_font.underline
 
 
 def _apply_highlight_color(run, color_name: str):
@@ -262,5 +293,5 @@ if __name__ == '__main__':
     annotate_words_with_configs(word_path, word_configs)
 
     # 方案2: 多个词语使用相同配置
-    # same_config = create_emphasize_config(color=(255, 0, 0))
+    # same_config = create_emphasize_config(color="red")
     # annotate_multiple_words_same_config(word_path, ["甲方", "乙方"], same_config)
