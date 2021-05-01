@@ -6,6 +6,8 @@ from typing import Optional, Tuple, List
 from docx import Document
 from dotenv import load_dotenv
 
+from word.docx_demo.common import copy_font_format
+
 load_dotenv()
 
 
@@ -25,25 +27,6 @@ class AnnotationConfig:
 
     font_color: Optional[str] = None  # 字体颜色名称
 
-
-def copy_font_format(source_font, target_font):
-    """复制字体格式"""
-    try:
-        if source_font.name:
-            target_font.name = source_font.name
-        if source_font.size:
-            target_font.size = source_font.size
-        if source_font.bold is not None:
-            target_font.bold = source_font.bold
-        if source_font.italic is not None:
-            target_font.italic = source_font.italic
-        if source_font.underline is not None:
-            target_font.underline = source_font.underline
-        if source_font.color.rgb:
-            # 颜色由调用方决定，这里不复制原颜色
-            pass
-    except:
-        pass
 
 
 def annotate_words_with_configs(file_path: str, word_configs: dict[str, AnnotationConfig]):
@@ -288,6 +271,13 @@ if __name__ == '__main__':
             highlight_color="green",  # 绿色高亮
             font_color="blue",  # 蓝色字体
             symbols=("【", "】")  # 方括号
+        ),
+        "喵喵公司": create_full_annotation_config(
+            comment_text="对喵喵公司的评论",
+            author="评论员",
+            highlight_color="red",
+            font_color="lime",
+            symbols=("[", "]")
         ),
     }
     annotate_words_with_configs(word_path, word_configs)
