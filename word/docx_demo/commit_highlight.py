@@ -28,7 +28,6 @@ class AnnotationConfig:
     font_color: Optional[str] = None  # 字体颜色名称
 
 
-
 def annotate_words_with_configs(file_path: str, word_configs: dict[str, AnnotationConfig]):
     """
     在文档中标注多个词语（为每个词语使用不同配置）
