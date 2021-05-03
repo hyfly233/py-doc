@@ -74,7 +74,7 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
                 char_formats.append(run.font)
                 char_index += 1
 
-        # 构建正则表达式，匹配所有目标词语
+        # 构建正则表达式，匹配所有目标词语，如：喵喵公司|公司|喵
         pattern = '|'.join(re.escape(word) for word in sorted_words)
 
         # 分割文本，保留分隔符
