@@ -14,7 +14,7 @@ def parse_document(doc: BaseDocument) -> BaseDocument | None:
     if doc.file_extension_name == "docx":
         docx_d = docx.Document(file_path)
 
-        print(docx.comments)
+        print(docx_d.comments)
 
     return None
 
