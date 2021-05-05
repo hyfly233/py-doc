@@ -1,4 +1,7 @@
-def copy_font_format(source_font, target_font):
+from docx.text.font import Font
+
+
+def copy_font_format(source_font: Font, target_font: Font):
     """复制字体格式"""
     try:
         if source_font.name:
