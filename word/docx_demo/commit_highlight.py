@@ -265,15 +265,15 @@ if __name__ == '__main__':
         "公司": create_highlight_config(color="yellow"),  # 黄色高亮
         "喵": create_emphasize_config(symbols=("「", "」"), color="red"),  # 红色突出显示
         "卖方": create_full_annotation_config(
-            comment_text="重要角色标识",
-            author="审核员",
+            comment_text="对卖方的评论",
+            author="评论员1",
             highlight_color="green",  # 绿色高亮
             font_color="blue",  # 蓝色字体
             symbols=("【", "】")  # 方括号
         ),
         "喵喵公司": create_full_annotation_config(
             comment_text="对喵喵公司的评论",
-            author="评论员",
+            author="评论员2",
             highlight_color="red",
             font_color="lime",
             symbols=("[", "]")
