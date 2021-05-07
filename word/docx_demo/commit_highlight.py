@@ -262,6 +262,7 @@ if __name__ == '__main__':
 
     # 方案1: 多个词语使用不同配置
     word_configs = {
+        "附件": create_highlight_config(color="red"),
         "公司": create_highlight_config(color="yellow"),  # 黄色高亮
         "喵": create_emphasize_config(symbols=("「", "」"), color="red"),  # 红色突出显示
         "卖方": create_full_annotation_config(
