@@ -11,13 +11,12 @@ from common.utils import calculate_md5_file
 load_dotenv()
 
 
-
 def parse_document(doc: BaseDocument) -> BaseDocument | None:
     if doc.file_extension_name == "pdf":
         pdf = pymupdf.open(file_path)
 
         for page_num in range(pdf.page_count):
-            page:fitz.Document = pdf[page_num]
+            page: fitz.Document = pdf[page_num]
 
             text = page.get_text("text")
 

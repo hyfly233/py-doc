@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 @dataclass
 class DocumentChunkPosition:
     """文档分块位置信息"""
