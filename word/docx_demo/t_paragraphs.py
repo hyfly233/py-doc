@@ -16,7 +16,7 @@ def parse_document_paragraphs(file_path):
             print(f"段落 {i + 1}，内容: {para.text}")
 
             for j, run in enumerate(para.runs):
-                print(f"段落 {i + 1}，Run {j + 1}，内容: {run.text}")
+                print(f"   段落 {i + 1}，Run {j + 1}，内容: {run.text}")
 
             print("---------------------")
 

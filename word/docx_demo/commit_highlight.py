@@ -54,6 +54,8 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
     # 按词语长度降序排序，优先处理长词，避免短词干扰长词的匹配
     sorted_words = sorted(target_words, key=len, reverse=True)
 
+    print(f"段落数量 {len(doc.paragraphs)}")
+
     for i, paragraph in enumerate(doc.paragraphs):
         full_text = paragraph.text
 
@@ -62,7 +64,7 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
         if not has_target_words:
             continue
 
-        print(f"index: {i}, original text: {full_text}")
+        print(f"段落 {i + 1}, 内容: {full_text}")
 
         # 创建字符到格式的映射
         char_formats = []
@@ -164,6 +166,13 @@ def annotate_words_with_configs(file_path: str, word_configs: dict[str, Annotati
             current_pos += len(part)
 
         print(f"index: {i}, processed text: {paragraph.text}")
+
+    print("==============")
+
+    print(f"表格数量 {len(doc.tables)}")
+
+    for i, table in enumerate(doc.tables):
+        pass
 
     # 保存新文档
     doc.save(new_file_path)
