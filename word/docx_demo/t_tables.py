@@ -23,10 +23,10 @@ def table_to_markdown(table):
         markdown_line = '| ' + ' | '.join(cells) + ' |'
         markdown_lines.append(markdown_line)
 
-        # 在第一行后添加分隔符
-        if i == 0:
-            separator = '|' + '|'.join([' --- ' for _ in cells]) + '|'
-            markdown_lines.append(separator)
+        # # 在第一行后添加分隔符
+        # if i == 0:
+        #     separator = '|' + '|'.join([' --- ' for _ in cells]) + '|'
+        #     markdown_lines.append(separator)
 
     return '\n'.join(markdown_lines)
 
@@ -73,5 +73,5 @@ if __name__ == "__main__":
     print(markdown_result)
 
     # 保存到文件
-    with open("output.md", "w", encoding="utf-8") as f:
-        f.write(markdown_result)
+    # with open("output.md", "w", encoding="utf-8") as f:
+    #     f.write(markdown_result)
