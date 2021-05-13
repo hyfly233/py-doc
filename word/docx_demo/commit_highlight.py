@@ -297,21 +297,6 @@ def _apply_font_color(run, color_name: str):
 
 
 # 预设配置函数保持不变...
-def create_highlight_config(color: str = "yellow") -> AnnotationConfig:
-    """创建高亮配置"""
-    return AnnotationConfig(highlight=True, highlight_color=color)
-
-
-def create_comment_config(comment_text: str = "", author: str = "标注者") -> AnnotationConfig:
-    """创建注释配置"""
-    return AnnotationConfig(add_comment=True, comment_text=comment_text, comment_author=author)
-
-
-def create_emphasize_config(symbols: Tuple[str, str] = ("「", "」"),
-                            color: str = "red") -> AnnotationConfig:
-    """创建突出显示配置"""
-    return AnnotationConfig(emphasize=True, emphasize_symbols=symbols, font_color=color)
-
 
 def create_full_annotation_config(comment_text: str = "",
                                   author: str = "标注者",
@@ -336,22 +321,25 @@ if __name__ == '__main__':
 
     # 方案1: 多个词语使用不同配置
     word_configs = {
-        "附件": create_highlight_config(color="red"),
-        "公司": create_highlight_config(color="yellow"),
-        "喵": create_emphasize_config(symbols=("「", "」"), color="red"),
-        "卖方": create_full_annotation_config(
+        "附件": AnnotationConfig(highlight=True, highlight_color="red"),
+        "公司": AnnotationConfig(highlight=True, highlight_color="yellow"),
+        "喵": AnnotationConfig(font_color="red"),
+
+        "卖方": AnnotationConfig(
+            add_comment=True,
             comment_text="对卖方的评论",
-            author="评论员1",
+            comment_author="评论员1",
+            highlight=True,
             highlight_color="green",
             font_color="blue",
-            symbols=("【", "】")
         ),
-        "喵喵公司": create_full_annotation_config(
+        "喵喵公司": AnnotationConfig(
+            add_comment=True,
             comment_text="对喵喵公司的评论",
-            author="评论员2",
+            comment_author="评论员2",
+            highlight=True,
             highlight_color="red",
             font_color="lime",
-            symbols=("[", "]")
         ),
     }
 
