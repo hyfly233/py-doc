@@ -296,26 +296,6 @@ def _apply_font_color(run, color_name: str):
     run.font.color.rgb = color_map.get(color_name.lower(), RGBColor(0, 0, 0))
 
 
-# 预设配置函数保持不变...
-
-def create_full_annotation_config(comment_text: str = "",
-                                  author: str = "标注者",
-                                  highlight_color: str = "yellow",
-                                  font_color: str = "red",
-                                  symbols: Tuple[str, str] = ("「", "」")) -> AnnotationConfig:
-    """创建完整标注配置（注释+高亮+突出显示）"""
-    return AnnotationConfig(
-        add_comment=True,
-        comment_text=comment_text,
-        comment_author=author,
-        highlight=True,
-        highlight_color=highlight_color,
-        emphasize=True,
-        emphasize_symbols=symbols,
-        font_color=font_color
-    )
-
-
 if __name__ == '__main__':
     word_path: str = os.getenv('WORD_PATH')
 
