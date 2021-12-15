@@ -51,7 +51,7 @@ class DocumentAnnotator:
 
             # 处理段落
             print(f"段落数量: {len(doc.paragraphs)}")
-            self._process_paragraphs(doc.paragraphs, doc, "段落")
+            self._process_paragraphs(doc.paragraphs, doc)
 
             # 处理表格
             print(f"表格数量: {len(doc.tables)}")
@@ -73,14 +73,14 @@ class DocumentAnnotator:
                 for k, cell in enumerate(row.cells):
                     if cell.text.strip():  # 只处理非空单元格
                         print(f"表格 {i + 1}, 行 {j + 1}, 列 {k + 1}, 内容: {cell.text}")
-                        self._process_paragraphs(cell.paragraphs, doc, f"表格{i + 1}-行{j + 1}-列{k + 1}")
+                        self._process_paragraphs(cell.paragraphs, doc)
 
-    def _process_paragraphs(self, paragraphs: List[Paragraph], doc, context: str = ""):
+    def _process_paragraphs(self, paragraphs: List[Paragraph], doc):
         """处理段落列表"""
         for i, paragraph in enumerate(paragraphs):
-            self._process_single_paragraph(paragraph, doc, f"{context}-段落{i + 1}")
+            self._process_single_paragraph(paragraph, doc, i)
 
-    def _process_single_paragraph(self, paragraph: Paragraph, doc, context: str = ""):
+    def _process_single_paragraph(self, paragraph: Paragraph, doc, index: int):
         """处理单个段落"""
         full_text = paragraph.text
 
@@ -88,7 +88,7 @@ class DocumentAnnotator:
         if not any(word in full_text for word in self.sorted_words):
             return
 
-        print(f"{context}, 内容: {full_text}")
+        print(f"段落 {index + 1}, 内容: {full_text}")
 
         try:
             # 创建字符到格式的映射
@@ -101,10 +101,10 @@ class DocumentAnnotator:
             self._clear_paragraph_runs(paragraph)
             self._rebuild_paragraph(paragraph, parts, char_formats, doc)
 
-            print(f"  {context}, 处理后的内容: {paragraph.text}")
+            print(f"  段落 {index + 1}, 处理后的内容: {paragraph.text}")
 
         except Exception as e:
-            print(f"处理段落时发生错误 ({context}): {e}")
+            print(f"处理段落 ({index + 1})时发生错误: {e}")
 
     def _create_char_format_mapping(self, paragraph: Paragraph) -> List:
         """创建字符到格式的映射"""
