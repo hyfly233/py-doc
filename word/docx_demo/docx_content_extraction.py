@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, List
 
 from docx import Document
@@ -10,9 +11,15 @@ from word.docx_demo.t_tables import table_to_markdown
 load_dotenv()
 
 
+class LocationType(Enum):
+    PARAGRAPH = "paragraph"
+    TABLE = "table"
+
+
 @dataclass
 class DocxContent:
     index: int
+    type: str
     content: str
 
 
