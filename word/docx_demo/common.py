@@ -17,5 +17,5 @@ def copy_font_format(source_font: Font, target_font: Font):
         if source_font.color.rgb:
             # 颜色由调用方决定，这里不复制原颜色
             pass
-    except:
+    except Exception:
         pass

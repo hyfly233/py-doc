@@ -15,6 +15,7 @@ load_dotenv()
 @dataclass
 class AnnotationConfig:
     """标注配置类"""
+
     add_comment: bool = False  # 是否添加注释
     comment_text: str = ""  # 注释内容
     comment_author: str = "标注者"  # 注释作者
@@ -48,14 +49,15 @@ def _add_comment(doc, run, config: AnnotationConfig, word: str):
             runs=[run],
             text=comment_text,
             author=config.comment_author,
-            initials=config.comment_initials
+            initials=config.comment_initials,
         )
     except Exception as e:
         print(f"添加注释失败: {e}")
 
 
-def _add_normal_text(paragraph: Paragraph, text: str,
-                     char_formats: List, start_pos: int):
+def _add_normal_text(
+    paragraph: Paragraph, text: str, char_formats: List, start_pos: int
+):
     """
     添加普通文本，保持原有格式
 
@@ -73,9 +75,10 @@ def _add_normal_text(paragraph: Paragraph, text: str,
 
         if format_idx < len(char_formats):
             # 检查是否需要创建新run
-            need_new_run = (char_idx == 0 or
-                            (format_idx > 0 and
-                             char_formats[format_idx] != char_formats[format_idx - 1]))
+            need_new_run = char_idx == 0 or (
+                format_idx > 0
+                and char_formats[format_idx] != char_formats[format_idx - 1]
+            )
 
             if need_new_run:
                 char_run = paragraph.add_run(char)
@@ -92,8 +95,9 @@ def _add_normal_text(paragraph: Paragraph, text: str,
             _add_char_with_fallback_format(paragraph, char, char_formats, char_idx)
 
 
-def _add_char_with_fallback_format(paragraph: Paragraph, char: str,
-                                   char_formats: List, char_idx: int):
+def _add_char_with_fallback_format(
+    paragraph: Paragraph, char: str, char_formats: List, char_idx: int
+):
     """
     使用备用格式添加字符
 
@@ -102,7 +106,7 @@ def _add_char_with_fallback_format(paragraph: Paragraph, char: str,
         char: 目标字符
         char_formats: 每个字符对应的格式列表
         char_idx: 当前字符索引
-        
+
     Returns:
         None
     """
@@ -125,7 +129,7 @@ def _apply_annotation_format(run, config: AnnotationConfig):
         run: 目标run
         config: 标注配置
 
-    Returns:   
+    Returns:
         None
     """
     # 修改字体颜色
@@ -241,7 +245,7 @@ class DocumentAnnotator:
         # 将词语按长度排序，防止子串冲突，如 "喵喵公司" "公司" "喵"
         self.sorted_words = sorted(word_configs.keys(), key=len, reverse=True)
         # 构建正则表达式模式，如 "喵喵公司|公司|喵"
-        self.pattern = '|'.join(re.escape(word) for word in self.sorted_words)
+        self.pattern = "|".join(re.escape(word) for word in self.sorted_words)
 
     def annotate_document(self, file_path: str) -> str:
         """
@@ -253,7 +257,7 @@ class DocumentAnnotator:
         Returns:
             None
         """
-        if not file_path.endswith('.docx'):
+        if not file_path.endswith(".docx"):
             raise ValueError("只支持 .docx 格式文件")
 
         # 生成新文件名
@@ -295,7 +299,9 @@ class DocumentAnnotator:
             for j, row in enumerate(table.rows):
                 for k, cell in enumerate(row.cells):
                     if cell.text.strip():  # 只处理非空单元格
-                        print(f"表格 {i + 1}, 行 {j + 1}, 列 {k + 1}, 内容: {cell.text}")
+                        print(
+                            f"表格 {i + 1}, 行 {j + 1}, 列 {k + 1}, 内容: {cell.text}"
+                        )
                         self._process_paragraphs(cell.paragraphs, doc)
 
     def _process_paragraphs(self, paragraphs: List[Paragraph], doc):
@@ -335,7 +341,7 @@ class DocumentAnnotator:
             char_formats = _create_char_format_mapping(paragraph)
 
             # 分割文本
-            parts = re.split(f'({self.pattern})', full_text)
+            parts = re.split(f"({self.pattern})", full_text)
 
             # 清空并重建段落
             _clear_paragraph_runs(paragraph)
@@ -346,8 +352,9 @@ class DocumentAnnotator:
         except Exception as e:
             print(f"处理段落 ({index + 1})时发生错误: {e}")
 
-    def _rebuild_paragraph(self, paragraph: Paragraph, parts: List[str],
-                           char_formats: List, doc):
+    def _rebuild_paragraph(
+        self, paragraph: Paragraph, parts: List[str], char_formats: List, doc
+    ):
         """
         重建段落内容
 
@@ -367,14 +374,17 @@ class DocumentAnnotator:
                 continue
 
             if part in self.sorted_words:
-                self._add_annotated_word(paragraph, part, char_formats, current_pos, doc)
+                self._add_annotated_word(
+                    paragraph, part, char_formats, current_pos, doc
+                )
             else:
                 _add_normal_text(paragraph, part, char_formats, current_pos)
 
             current_pos += len(part)
 
-    def _add_annotated_word(self, paragraph: Paragraph, word: str,
-                            char_formats: List, current_pos: int, doc):
+    def _add_annotated_word(
+        self, paragraph: Paragraph, word: str, char_formats: List, current_pos: int, doc
+    ):
         """
         添加标注的词语
 
@@ -395,7 +405,9 @@ class DocumentAnnotator:
 
         # 突出显示 (添加括号)
         if config.emphasize:
-            annotated_word = f"{config.emphasize_symbols[0]}{word}{config.emphasize_symbols[1]}"
+            annotated_word = (
+                f"{config.emphasize_symbols[0]}{word}{config.emphasize_symbols[1]}"
+            )
 
         # 添加run
         target_run = paragraph.add_run(annotated_word)
@@ -413,7 +425,9 @@ class DocumentAnnotator:
             _add_comment(doc, target_run, config, word)
 
 
-def annotate_words_with_configs(file_path: str, word_configs: Dict[str, AnnotationConfig]) -> str:
+def annotate_words_with_configs(
+    file_path: str, word_configs: Dict[str, AnnotationConfig]
+) -> str:
     """
     在文档中标注多个词语（为每个词语使用不同配置）
 
@@ -431,8 +445,9 @@ def annotate_words_with_configs(file_path: str, word_configs: Dict[str, Annotati
     return annotator.annotate_document(file_path)
 
 
-def annotate_multiple_words_same_config(file_path: str, target_words: List[str],
-                                        config: AnnotationConfig) -> str:
+def annotate_multiple_words_same_config(
+    file_path: str, target_words: List[str], config: AnnotationConfig
+) -> str:
     """
     在文档中标注多个词语（使用相同配置）
 
@@ -448,15 +463,14 @@ def annotate_multiple_words_same_config(file_path: str, target_words: List[str],
     return annotate_words_with_configs(file_path, word_configs)
 
 
-if __name__ == '__main__':
-    word_path: str = os.getenv('WORD_PATH')
+if __name__ == "__main__":
+    word_path: str = os.getenv("WORD_PATH")
 
     # 方案1: 多个词语使用不同配置
     word_configs = {
         "附件": AnnotationConfig(highlight=True, highlight_color="red"),
         "公司": AnnotationConfig(highlight=True, highlight_color="yellow"),
         "喵": AnnotationConfig(font_color="red"),
-
         "卖方": AnnotationConfig(
             add_comment=True,
             comment_text="对卖方的评论",

@@ -7,7 +7,7 @@ load_dotenv()
 
 
 def parse_document_paragraphs(file_path):
-    if file_path.endswith('.docx'):
+    if file_path.endswith(".docx"):
         doc = Document(file_path)
 
         print(f"段落数量: {len(doc.paragraphs)}")
@@ -21,6 +21,6 @@ def parse_document_paragraphs(file_path):
             print("---------------------")
 
 
-if __name__ == '__main__':
-    word_path: str = os.getenv('WORD_PATH')
+if __name__ == "__main__":
+    word_path: str = os.getenv("WORD_PATH")
     parse_document_paragraphs(word_path)

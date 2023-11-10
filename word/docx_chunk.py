@@ -19,7 +19,7 @@ def parse_document(doc: BaseDocument) -> BaseDocument | None:
     return None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     doc_id = str(uuid.uuid4())
     file_path = os.getenv("WORD_PATH")
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         file_extension_name="docx",
         content=None,
         chunk_size=2000,
-        chunk_overlap=200
+        chunk_overlap=200,
     )
 
     processed_doc = parse_document(document)

@@ -16,19 +16,19 @@ def table_to_markdown(table):
         cells = []
         for cell in row.cells:
             # 获取单元格文本，移除多余空白
-            cell_text = cell.text.strip().replace('\n', ' ')
+            cell_text = cell.text.strip().replace("\n", " ")
             cells.append(cell_text)
 
         # 创建表格行
-        markdown_line = '| ' + ' | '.join(cells) + ' |'
+        markdown_line = "| " + " | ".join(cells) + " |"
         markdown_lines.append(markdown_line)
 
         # 在第一行后添加分隔符
         if i == 0:
-            separator = '|' + '|'.join([' --- ' for _ in cells]) + '|'
+            separator = "|" + "|".join([" --- " for _ in cells]) + "|"
             markdown_lines.append(separator)
 
-    return '\n'.join(markdown_lines)
+    return "\n".join(markdown_lines)
 
 
 def convert_docx_tables_to_markdown(docx_path):
@@ -41,11 +41,11 @@ def convert_docx_tables_to_markdown(docx_path):
         markdown_content.append(table_to_markdown(table))
         markdown_content.append("")  # 添加空行
 
-    return '\n'.join(markdown_content)
+    return "\n".join(markdown_content)
 
 
 def parse_document_tables(file_path):
-    if file_path.endswith('.docx'):
+    if file_path.endswith(".docx"):
         doc = Document(file_path)
 
         print(f"表格个数: {len(doc.tables)}")
@@ -64,7 +64,7 @@ def parse_document_tables(file_path):
 
 # 使用示例
 if __name__ == "__main__":
-    word_path: str = os.getenv('WORD_PATH')
+    word_path: str = os.getenv("WORD_PATH")
     parse_document_tables(word_path)
 
     print("\n----------------------------------------------\n")

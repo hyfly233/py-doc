@@ -34,7 +34,7 @@ class DocxContentExtraction:
 
 def content_extraction(file_path: str) -> List[DocxContent]:
     """从 Word 文档中提取内容"""
-    if not file_path.endswith('.docx'):
+    if not file_path.endswith(".docx"):
         raise ValueError("仅支持 .docx 格式的文件")
 
     try:
@@ -59,8 +59,8 @@ def content_extraction(file_path: str) -> List[DocxContent]:
     return dcl
 
 
-if __name__ == '__main__':
-    word_path: str = os.getenv('WORD_PATH')
+if __name__ == "__main__":
+    word_path: str = os.getenv("WORD_PATH")
 
     try:
         ce = content_extraction(word_path)

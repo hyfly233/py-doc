@@ -11,7 +11,7 @@ load_dotenv()
 
 
 def add_comments(file_path: str, words: List[str]):
-    if not file_path.endswith('.docx'):
+    if not file_path.endswith(".docx"):
         print("只支持 .docx 格式文件")
         return
     doc = Document(file_path)
@@ -48,10 +48,10 @@ def add_comments(file_path: str, words: List[str]):
                 char_index += 1
 
         # 构建正则表达式，匹配所有目标词语
-        pattern = '|'.join(re.escape(word) for word in sorted_words)
+        pattern = "|".join(re.escape(word) for word in sorted_words)
 
         # 分割文本，保留分隔符
-        parts = re.split(f'({pattern})', full_text)
+        parts = re.split(f"({pattern})", full_text)
 
         # 清空段落的所有runs
         for run in paragraph.runs:
@@ -82,7 +82,7 @@ def add_comments(file_path: str, words: List[str]):
                         runs=[target_run],
                         text=f"这是对词语'{part}'的评论。",
                         author="作者名(测试)",
-                        initials="作者(测试)"
+                        initials="作者(测试)",
                     )
                 except Exception as e:
                     print(f"添加注释失败: {e}")
@@ -95,7 +95,9 @@ def add_comments(file_path: str, words: List[str]):
                     if format_idx < len(char_formats):
                         # 为每个字符创建单独的run（如果格式不同）
                         if char_idx == 0 or (
-                                format_idx > 0 and char_formats[format_idx] != char_formats[format_idx - 1]):
+                            format_idx > 0
+                            and char_formats[format_idx] != char_formats[format_idx - 1]
+                        ):
                             # 创建新的run
                             char_run = paragraph.add_run(char)
                             copy_font_format(char_formats[format_idx], char_run.font)
@@ -122,6 +124,6 @@ def add_comments(file_path: str, words: List[str]):
     print(f"标注完成，新文件已保存为: {new_file_path}")
 
 
-if __name__ == '__main__':
-    word_path: str = os.getenv('WORD_PATH')
+if __name__ == "__main__":
+    word_path: str = os.getenv("WORD_PATH")
     add_comments(word_path, ["喵", "公司", "北京", "喵喵公司"])

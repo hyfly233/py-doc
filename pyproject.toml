@@ -23,6 +23,11 @@ dependencies = [
     "openai>=1.97.1",
 ]
 
+[dependency-groups]
+dev = [
+    "ruff>=0.13.1",
+]
+
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
