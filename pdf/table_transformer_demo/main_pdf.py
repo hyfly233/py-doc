@@ -10,7 +10,9 @@ from pdf.table_transformer_demo.utils import plot_results
 
 load_dotenv()
 
-model = TableTransformerForObjectDetection.from_pretrained("microsoft/table-transformer-detection")
+model = TableTransformerForObjectDetection.from_pretrained(
+    "microsoft/table-transformer-detection"
+)
 
 
 def process_pdf(pdf_path):
@@ -28,24 +30,26 @@ def process_pdf(pdf_path):
 
         width, height = img.size
 
-        processed_result = detr_image_processor.post_process_object_detection(outputs,
-                                                                              threshold=0.7,
-                                                                              target_sizes=[(height, width)])
+        processed_result = detr_image_processor.post_process_object_detection(
+            outputs, threshold=0.7, target_sizes=[(height, width)]
+        )
 
         for results in processed_result:
-            scores = results['scores']
-            labels = results['labels']
-            boxes = results['boxes']
+            scores = results["scores"]
+            labels = results["labels"]
+            boxes = results["boxes"]
 
             print(f"第 {page_number + 1} 页检测到 {len(boxes)} 个表格/对象")
             for i, box in enumerate(boxes):
                 (xmin, ymin, xmax, ymax) = box.tolist()
-                print(f"  表格 {i} - xmin: {xmin}, ymin: {ymin}, xmax: {xmax}, ymax: {ymax}")
+                print(
+                    f"  表格 {i} - xmin: {xmin}, ymin: {ymin}, xmax: {xmax}, ymax: {ymax}"
+                )
 
             # 可选：可视化
             plot_results(model, img, scores, labels, boxes)
 
 
-if __name__ == '__main__':
-    file_path = os.getenv('PDF_PATH')
+if __name__ == "__main__":
+    file_path = os.getenv("PDF_PATH")
     process_pdf(file_path)

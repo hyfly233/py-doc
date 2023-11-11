@@ -14,34 +14,31 @@ from docling.datamodel.pipeline_options import (
     TableStructureOptions,
     TableFormerMode,
 )
-from docling.document_converter import (
-    DocumentConverter,
-    PdfFormatOption
-)
+from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.types import DoclingDocument
-from docling_core.types.doc import (
-    TableItem,
-    ProvenanceItem
-)
+from docling_core.types.doc import TableItem, ProvenanceItem
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
 )
 _log = logging.getLogger(__name__)
 
 
 class TableLocation:
-    def __init__(self, page_no: int, name: str, rect: tuple[float, float, float, float]):
+    def __init__(
+        self, page_no: int, name: str, rect: tuple[float, float, float, float]
+    ):
         self.page_no = page_no
         self.name = name
         self.rect = rect
 
 
 def main():
-    pdf_path: str = os.getenv('PDF_PATH')
+    pdf_path: str = os.getenv("PDF_PATH")
     pdf_basename = os.path.splitext(os.path.basename(pdf_path))[0]
 
     # docling 识别表格并获取 bbox
@@ -50,7 +47,7 @@ def main():
     pipeline_options.do_table_structure = True
     pipeline_options.table_structure_options = TableStructureOptions(
         do_cell_matching=False,  # 启用单元格匹配
-        mode=TableFormerMode.FAST
+        mode=TableFormerMode.FAST,
     )
 
     pipeline_options.accelerator_options = AcceleratorOptions(
@@ -60,23 +57,26 @@ def main():
 
     converter = DocumentConverter(
         format_options={
-            InputFormat.PDF: PdfFormatOption(
-                pipeline_options=pipeline_options
-            ),
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options),
         }
     )
 
     start_time = time.time()
     # 格式化时间
     _log.info(
-        f"开始转换文档，开始时间 [{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))}] ..........")
+        f"开始转换文档，开始时间 [{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] .........."
+    )
 
     input_doc_path = Path(pdf_path)
     conv_result = converter.convert(input_doc_path)
 
     end_time = time.time()
-    _log.info(f"转换文档结束，完成时间 [{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))}] ..........")
-    _log.info(f"转换文档状态 {conv_result.status} 耗时 [{end_time - start_time}] s ..........")
+    _log.info(
+        f"转换文档结束，完成时间 [{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}] .........."
+    )
+    _log.info(
+        f"转换文档状态 {conv_result.status} 耗时 [{end_time - start_time}] s .........."
+    )
 
     _log.info(f"###########################")
 
@@ -88,7 +88,6 @@ def main():
     table_locations: List[TableLocation] = []
 
     for i, table in enumerate(tables):
-
         prov: List[ProvenanceItem] = table.prov
         location: str = ""
         for e in prov:
@@ -105,7 +104,11 @@ def main():
             )
 
             # docling 的坐标与 fitz 的坐标系 y 轴是相反的
-            table_locations.append(TableLocation(page_no, f"p{page_no}_t{i}", (bbox.l, bbox.t, bbox.r, bbox.b)))
+            table_locations.append(
+                TableLocation(
+                    page_no, f"p{page_no}_t{i}", (bbox.l, bbox.t, bbox.r, bbox.b)
+                )
+            )
 
     _log.info(f"###########################")
 
@@ -136,11 +139,13 @@ def main():
             clip: fitz.Rect = fitz.Rect(safe_rect)
             pix: fitz.Pixmap = page.get_pixmap(clip=clip, dpi=200)
             # 保存为图片
-            img: Image.Image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            img: Image.Image = Image.frombytes(
+                "RGB", [pix.width, pix.height], pix.samples
+            )
 
             png_name = f"{table_location.name}.png"
             img.save(png_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

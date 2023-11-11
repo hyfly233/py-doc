@@ -9,7 +9,8 @@ from ultralytics import YOLO
 load_dotenv()
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
 )
 _log = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ MODEL_PATH = os.getenv("MODEL_PATH")
 
 
 def main():
-    pdf_path: str = os.getenv('PDF_PATH')
+    pdf_path: str = os.getenv("PDF_PATH")
 
     # 打开PDF
     doc: fitz.Document = fitz.open(pdf_path)
@@ -42,12 +43,14 @@ def main():
 
             for i, box in enumerate(boxes.xyxy):
                 (xmin, ymin, xmax, ymax) = box.tolist()
-                print(f"  表格 {i} - xmin: {xmin}, ymin: {ymin}, xmax: {xmax}, ymax: {ymax}")
+                print(
+                    f"  表格 {i} - xmin: {xmin}, ymin: {ymin}, xmax: {xmax}, ymax: {ymax}"
+                )
 
                 png_name = f"p{page_number + 1}_t{i}.png"
                 cropped_img = img.crop((xmin, ymin, xmax, ymax))
                 cropped_img.save(png_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

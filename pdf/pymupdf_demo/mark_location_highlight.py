@@ -8,12 +8,12 @@ load_dotenv()
 COLOR_MAP = {
     "high": fitz.utils.getColor("red"),
     "middle": fitz.utils.getColor("orange"),
-    "low": fitz.utils.getColor("yellow")
+    "low": fitz.utils.getColor("yellow"),
 }
 
 
 def parse_document(file_path):
-    if file_path.endswith('.pdf'):
+    if file_path.endswith(".pdf"):
         doc = fitz.open(file_path)
         text_blocks = []
         for page_num in range(doc.page_count):
@@ -23,13 +23,15 @@ def parse_document(file_path):
                 if "lines" in block:
                     for line in block["lines"]:
                         for span in line["spans"]:
-                            text_blocks.append({
-                                "text": span["text"],
-                                "bbox": span["bbox"],  # 位置坐标
-                                "page": page_num,
-                                "font": span["font"],
-                                "size": span["size"]
-                            })
+                            text_blocks.append(
+                                {
+                                    "text": span["text"],
+                                    "bbox": span["bbox"],  # 位置坐标
+                                    "page": page_num,
+                                    "font": span["font"],
+                                    "size": span["size"],
+                                }
+                            )
         return text_blocks, doc
 
 
@@ -58,26 +60,32 @@ def highlight_issues_in_document(doc, text_blocks, issues):
                 highlight.set_info(
                     title=f"审核问题 - {severity}严重程度",
                     content=f"问题类型: {issue['issue_type']}\n"
-                            f"建议: {issue['suggestion']}\n"
-                            f"说明: {issue['reasoning']}"
+                    f"建议: {issue['suggestion']}\n"
+                    f"说明: {issue['reasoning']}",
                 )
                 highlight.update()
 
     return highlighted_doc
 
 
-if __name__ == '__main__':
-    pdf_path: str = os.getenv('PDF_PATH')
+if __name__ == "__main__":
+    pdf_path: str = os.getenv("PDF_PATH")
     text_blocks, doc = parse_document(pdf_path)
     # print("text_blocks:", text_blocks)
     print("doc:", doc)
 
-    new_doc = highlight_issues_in_document(doc, text_blocks, [{
-        "content": "Because the database is in an inconsistent state, the usual tools to disassociate the IP no longer work",
-        "severity": "high",
-        "issue_type": "IP地址关联问题",
-        "suggestion": "请检查数据库状态并手动解除IP关联",
-        "reasoning": "数据库状态不一致导致无法正常解除IP关联"
-    }])
+    new_doc = highlight_issues_in_document(
+        doc,
+        text_blocks,
+        [
+            {
+                "content": "Because the database is in an inconsistent state, the usual tools to disassociate the IP no longer work",
+                "severity": "high",
+                "issue_type": "IP地址关联问题",
+                "suggestion": "请检查数据库状态并手动解除IP关联",
+                "reasoning": "数据库状态不一致导致无法正常解除IP关联",
+            }
+        ],
+    )
 
     new_doc.save("output/highlighted_document.pdf")

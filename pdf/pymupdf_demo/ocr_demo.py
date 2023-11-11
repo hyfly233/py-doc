@@ -9,7 +9,7 @@ os.environ["TESSDATA_PREFIX"] = os.getenv("TESSDATA_PREFIX")
 
 
 def main():
-    pdf_path: str = os.getenv('PDF_PATH')
+    pdf_path: str = os.getenv("PDF_PATH")
 
     doc: fitz.Document = fitz.open(pdf_path)
     page = doc[0]  # 第1页
@@ -19,5 +19,5 @@ def main():
     pix.pdfocr_save("./test.pdf")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

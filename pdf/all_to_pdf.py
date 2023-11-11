@@ -1,5 +1,6 @@
 import os
 import tempfile
+
 # import pytesseract
 from io import BytesIO
 
@@ -20,11 +21,11 @@ def main(inputs):
     file_ext = os.path.splitext(file_name.lower())[1]
 
     # 根据文件类型进行处理
-    if file_ext == '.pdf':
+    if file_ext == ".pdf":
         pdf_data, text_content, page_info = process_pdf(file_data)
-    elif file_ext in ['.doc', '.docx']:
+    elif file_ext in [".doc", ".docx"]:
         pdf_data, text_content, page_info = process_word_to_pdf(file_data)
-    elif file_ext in ['.png', '.jpg', '.jpeg']:
+    elif file_ext in [".png", ".jpg", ".jpeg"]:
         pdf_data, text_content, page_info = process_image_to_pdf(file_data)
     else:
         raise ValueError(f"不支持的文件格式: {file_ext}")
@@ -33,7 +34,7 @@ def main(inputs):
         "pdf_document": pdf_data,
         "extracted_text": text_content,
         "page_structure": page_info,
-        "original_format": file_ext
+        "original_format": file_ext,
     }
 
 
@@ -51,10 +52,7 @@ def process_pdf(file_data):
 
         # 获取文本块位置信息
         blocks = page.get_text("dict")
-        page_info.append({
-            "page_num": page_num,
-            "blocks": blocks
-        })
+        page_info.append({"page_num": page_num, "blocks": blocks})
 
     # 保存PDF到字节流
     pdf_bytes = BytesIO()
@@ -66,13 +64,14 @@ def process_pdf(file_data):
 
 # ??????
 
+
 def process_word_to_pdf(file_data):
     """将Word转换为PDF并处理"""
-    with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as word_file:
+    with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as word_file:
         word_file.write(file_data)
         word_file_path = word_file.name
 
-    with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as pdf_file:
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as pdf_file:
         pdf_file_path = pdf_file.name
 
     try:
@@ -88,7 +87,7 @@ def process_word_to_pdf(file_data):
         convert(word_file_path, pdf_file_path)
 
         # 读取转换后的PDF
-        with open(pdf_file_path, 'rb') as f:
+        with open(pdf_file_path, "rb") as f:
             pdf_data = f.read()
 
         # 获取PDF的结构信息
@@ -96,10 +95,7 @@ def process_word_to_pdf(file_data):
         for page_num in range(pdf_doc.page_count):
             page = pdf_doc[page_num]
             blocks = page.get_text("dict")
-            page_info.append({
-                "page_num": page_num,
-                "blocks": blocks
-            })
+            page_info.append({"page_num": page_num, "blocks": blocks})
         pdf_doc.close()
 
         return pdf_data, text_content, page_info
@@ -145,13 +141,15 @@ def process_image_to_pdf(file_data):
     # return pdf_bytes.getvalue(), text_content, page_info
 
 
-if __name__ == '__main__':
-    word_path: str = os.getenv('WORD_PATH')
-    res = main({
-        "contract_file": open(word_path, "rb").read(),
-        "file_name": "example.docx",
-        "file_type": ".docx"
-    })
+if __name__ == "__main__":
+    word_path: str = os.getenv("WORD_PATH")
+    res = main(
+        {
+            "contract_file": open(word_path, "rb").read(),
+            "file_name": "example.docx",
+            "file_type": ".docx",
+        }
+    )
 
     # pdf_path: str = os.getenv('PDF_PATH')
     # res = main({

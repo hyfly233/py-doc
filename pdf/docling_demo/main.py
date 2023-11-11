@@ -14,9 +14,14 @@ from docling.datamodel.pipeline_options import (
     ApiVlmOptions,
     ResponseFormat,
     PdfPipelineOptions,
-    TableStructureOptions, TableFormerMode,
+    TableStructureOptions,
+    TableFormerMode,
 )
-from docling.document_converter import DocumentConverter, PdfFormatOption, WordFormatOption
+from docling.document_converter import (
+    DocumentConverter,
+    PdfFormatOption,
+    WordFormatOption,
+)
 from docling_core.transforms.chunker.hybrid_chunker import HybridChunker
 from docling_core.types import DoclingDocument
 from docling_core.types.doc import TableItem, ProvenanceItem
@@ -27,10 +32,11 @@ from dotenv import load_dotenv
 # 加载 .env 文件
 load_dotenv()
 
-PDF_PATH = os.getenv('PDF_PATH')
+PDF_PATH = os.getenv("PDF_PATH")
 
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
 )
 _log = logging.getLogger(__name__)
 
@@ -61,7 +67,7 @@ def main():
     pdf_pipeline_options.do_table_structure = True  # 启用表结构提取
     pdf_pipeline_options.table_structure_options = TableStructureOptions(
         do_cell_matching=False,  # 是否启用单元格匹配
-        mode=TableFormerMode.FAST
+        mode=TableFormerMode.FAST,
     )
     ## 代码块处理
     pdf_pipeline_options.do_code_enrichment = True  # 启用代码块提取
@@ -94,12 +100,8 @@ def main():
 
     converter = DocumentConverter(
         format_options={
-            InputFormat.PDF: PdfFormatOption(
-                pipeline_options=pdf_pipeline_options
-            ),
-            InputFormat.DOCX: WordFormatOption(
-                pipeline_options=pdf_pipeline_options
-            )
+            InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_pipeline_options),
+            InputFormat.DOCX: WordFormatOption(pipeline_options=pdf_pipeline_options),
         }
     )
 
@@ -131,15 +133,20 @@ def main():
         start_time = time.time()
         # 格式化时间
         _log.info(
-            f"开始转换文档，开始时间 [{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))}] ..........")
+            f"开始转换文档，开始时间 [{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] .........."
+        )
 
         # 转换文档
         input_doc_path = Path(PDF_PATH)
         conv_result = converter.convert(input_doc_path)
 
         end_time = time.time()
-        _log.info(f"转换文档结束，完成时间 [{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))}] ..........")
-        _log.info(f"转换文档状态 {conv_result.status} 耗时 [{end_time - start_time}] s ..........")
+        _log.info(
+            f"转换文档结束，完成时间 [{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}] .........."
+        )
+        _log.info(
+            f"转换文档状态 {conv_result.status} 耗时 [{end_time - start_time}] s .........."
+        )
 
         # 导出
         output_dir = Path("output")
@@ -150,10 +157,11 @@ def main():
 
         _log.info(f"文档的页数 {len(conv_result.pages)} ---- ")
         for i, page in enumerate(conv_result.pages):
-            _log.info(f"第 {i + 1} 页 - "
-                      f"pageNo {page.page_no} - "
-                      f"高度: {page.size.height} 宽度: {page.size.width} - "
-                      )
+            _log.info(
+                f"第 {i + 1} 页 - "
+                f"pageNo {page.page_no} - "
+                f"高度: {page.size.height} 宽度: {page.size.width} - "
+            )
 
         document: DoclingDocument = conv_result.document
 
@@ -162,7 +170,9 @@ def main():
         _log.info(f"文档的表格数量 {len(tables)} ---- ")
         for i, table in enumerate(tables):
             # 单独导出表格
-            with (output_dir / f"{doc_filename}_{i}.md").open("w", encoding="utf-8") as fp:
+            with (output_dir / f"{doc_filename}_{i}.md").open(
+                "w", encoding="utf-8"
+            ) as fp:
                 fp.write(table.export_to_markdown())
 
             # ？？？
@@ -183,16 +193,19 @@ def main():
                     f"表格位置: left {bbox.l} top {bbox.t} right {bbox.r} bottom {bbox.b} - "
                 )
 
-            _log.info(f"第 {i + 1} 个表格 - "
-                      f"location_tokens：{location_tokens} - \n"
-                      f"位置详情 {location} - "
-                      )
+            _log.info(
+                f"第 {i + 1} 个表格 - "
+                f"location_tokens：{location_tokens} - \n"
+                f"位置详情 {location} - "
+            )
 
         _log.info(f"###########################")
 
         # 将结果输出到 json 文件
         with (output_dir / f"{doc_filename}.json").open("w", encoding="utf-8") as file:
-            json.dump(conv_result.document.export_to_dict(), file, indent=4)  # indent参数使输出的JSON格式化，更易读
+            json.dump(
+                conv_result.document.export_to_dict(), file, indent=4
+            )  # indent参数使输出的JSON格式化，更易读
 
         _log.info("开始导出结果到 Markdown ..........")
 
@@ -228,5 +241,5 @@ def main():
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
