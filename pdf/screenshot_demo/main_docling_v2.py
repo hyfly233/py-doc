@@ -37,7 +37,7 @@ class TableLocation:
 
 def main():
     pdf_path: str = os.getenv("PDF_PATH")
-    pdf_basename = os.path.splitext(os.path.basename(pdf_path))[0]
+    # pdf_basename = os.path.splitext(os.path.basename(pdf_path))[0]
 
     # docling 识别表格并获取 bbox
     pipeline_options = PdfPipelineOptions()
@@ -78,7 +78,7 @@ def main():
         f"转换文档状态 {conv_result.status} 耗时 [{end_time - start_time}] s .........."
     )
 
-    _log.info(f"###########################")
+    _log.info("###########################")
 
     document: DoclingDocument = conv_result.document
     # 获取 table 的数量、位置

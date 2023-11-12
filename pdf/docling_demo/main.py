@@ -127,7 +127,7 @@ def main():
 
     # # ----------------------------
 
-    _log.info(f"转换器配置完成 ..........")
+    _log.info("转换器配置完成 ..........")
 
     try:
         start_time = time.time()
@@ -153,7 +153,7 @@ def main():
         output_dir.mkdir(parents=True, exist_ok=True)
         doc_filename = conv_result.input.file.stem
 
-        _log.info(f"###########################")
+        _log.info("###########################")
 
         _log.info(f"文档的页数 {len(conv_result.pages)} ---- ")
         for i, page in enumerate(conv_result.pages):
@@ -199,7 +199,7 @@ def main():
                 f"位置详情 {location} - "
             )
 
-        _log.info(f"###########################")
+        _log.info("###########################")
 
         # 将结果输出到 json 文件
         with (output_dir / f"{doc_filename}.json").open("w", encoding="utf-8") as file:
