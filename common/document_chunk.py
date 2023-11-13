@@ -11,6 +11,7 @@ load_dotenv()
 @dataclass
 class DocumentChunkPosition:
     """文档分块位置信息"""
+
     char_start: int = 0  # 内容实际起始位置
     char_end: int = 0  # 内容实际结束位置
     line_start: int = 1  # 起始行号
@@ -56,6 +57,7 @@ class DocumentChunkPosition:
 @dataclass
 class DocumentChunk:
     """文档分块类"""
+
     chunk_id: str  # 分块唯一标识
     chunk_index: int  # 分块序号（从0开始）
     content: str  # 完整内容（包含重叠部分）
@@ -97,14 +99,14 @@ class DocumentChunk:
         """获取与前一个分块的重叠内容"""
         if self.position.overlap_start == 0:
             return ""
-        return self.content[:self.position.overlap_start]
+        return self.content[: self.position.overlap_start]
 
     @property
     def overlap_with_next(self) -> str:
         """获取与后一个分块的重叠内容"""
         if self.position.overlap_end == 0:
             return ""
-        return self.content[-self.position.overlap_end:]
+        return self.content[-self.position.overlap_end :]
 
     def get_absolute_position(self, relative_pos: int) -> int:
         """将相对位置转换为文档中的绝对位置"""
@@ -118,6 +120,7 @@ class DocumentChunk:
 @dataclass
 class BaseDocument:
     """文档类"""
+
     doc_id: str  # 文档唯一标识
     file_name: str  # 文件名
     file_path: str  # 文件路径
@@ -164,7 +167,6 @@ class BaseDocument:
     def get_chunk_by_position(self, char_position: int) -> Optional[DocumentChunk]:
         """根据字符位置获取分块"""
         for chunk in self.chunks:
-            if (chunk.position.char_start <= char_position <=
-                    chunk.position.char_end):
+            if chunk.position.char_start <= char_position <= chunk.position.char_end:
                 return chunk
         return None

@@ -89,7 +89,7 @@ class DocumentProcessor:
                 overlap_start=overlap_start,
                 overlap_end=overlap_end,
                 content_start=start,
-                content_end=end
+                content_end=end,
             )
 
             # 创建分块
@@ -100,7 +100,7 @@ class DocumentProcessor:
                 position=position,
                 doc_id=doc.doc_id,
                 target_chunk_size=self.chunk_size,
-                tokens_count=self._count_tokens(chunk_content)
+                tokens_count=self._count_tokens(chunk_content),
             )
 
             chunks.append(chunk)
@@ -114,7 +114,7 @@ class DocumentProcessor:
     def _find_split_boundary(self, content: str, position: int) -> int:
         """寻找合适的分割边界"""
         # 在合同文档中，优先在句号、分号、换行符处分割
-        boundary_chars = ['。', '；', '\n', '，', ':', '：']
+        boundary_chars = ["。", "；", "\n", "，", ":", "："]
         search_range = min(100, len(content) - position)
 
         # 向后搜索边界字符
@@ -131,23 +131,25 @@ class DocumentProcessor:
 
     def _get_line_number(self, content: str, position: int) -> int:
         """获取指定位置的行号"""
-        return content[:position].count('\n') + 1
+        return content[:position].count("\n") + 1
 
     def _count_tokens(self, text: str) -> int:
         """简单的token计数（可以替换为更精确的方法）"""
         return len(text.split())
 
-    def _calculate_position(self, content: str, start: int, end: int) -> DocumentChunkPosition:
+    def _calculate_position(
+        self, content: str, start: int, end: int
+    ) -> DocumentChunkPosition:
         """计算位置信息"""
         # 计算起始行号
-        lines_before_start = content[:start].count('\n')
-        lines_before_end = content[:end].count('\n')
+        lines_before_start = content[:start].count("\n")
+        lines_before_end = content[:end].count("\n")
 
         return DocumentChunkPosition(
             char_start=start,
             char_end=end,
             line_start=lines_before_start + 1,
-            line_end=lines_before_end + 1
+            line_end=lines_before_end + 1,
         )
 
 
@@ -155,13 +157,15 @@ class ChunkVerifier:
     """分块验证工具"""
 
     @staticmethod
-    def verify_chunk_integrity(chunks: List[DocumentChunk], original_content: str) -> Dict:
+    def verify_chunk_integrity(
+        chunks: List[DocumentChunk], original_content: str
+    ) -> Dict:
         """验证分块完整性"""
         results = {
             "coverage_complete": True,
             "overlaps_correct": True,
             "content_matches": True,
-            "issues": []
+            "issues": [],
         }
 
         # 1. 验证覆盖完整性
@@ -229,7 +233,7 @@ class ChunkVerifier:
             "total_overlap": total_overlap,
             "total_stored": total_stored,
             "overlap_ratio": total_overlap / total_stored if total_stored > 0 else 0,
-            "efficiency": total_content / total_stored if total_stored > 0 else 0
+            "efficiency": total_content / total_stored if total_stored > 0 else 0,
         }
 
 
@@ -237,7 +241,7 @@ def create_sample_document():
     doc_id = str(uuid.uuid4())
     file_path = os.getenv("TXT_PATH")
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     doc = BaseDocument(
@@ -250,10 +254,7 @@ def create_sample_document():
         content=content,
         chunk_size=2000,
         chunk_overlap=200,
-        metadata={
-            "document_type": "contract",
-            "language": "zh-CN"
-        }
+        metadata={"document_type": "contract", "language": "zh-CN"},
     )
 
     return doc
@@ -271,8 +272,7 @@ def example_with_overlap_tracking():
     # 验证分块
     verifier = ChunkVerifier()
     integrity_result = verifier.verify_chunk_integrity(
-        processed_doc.chunks,
-        processed_doc.content
+        processed_doc.chunks, processed_doc.content
     )
 
     print("分块完整性验证:")
@@ -280,14 +280,14 @@ def example_with_overlap_tracking():
     print(f"重叠正确: {integrity_result['overlaps_correct']}")
     print(f"内容匹配: {integrity_result['content_matches']}")
 
-    if integrity_result['issues']:
+    if integrity_result["issues"]:
         print("发现问题:")
-        for issue in integrity_result['issues']:
+        for issue in integrity_result["issues"]:
             print(f"  - {issue}")
 
     # 分析重叠效率
     efficiency = verifier.analyze_overlap_efficiency(processed_doc.chunks)
-    print(f"\n重叠分析:")
+    print("\n重叠分析:")
     print(f"内容长度: {efficiency['content_length']}")
     print(f"重叠长度: {efficiency['total_overlap']}")
     print(f"存储效率: {efficiency['efficiency']:.2%}")
@@ -302,5 +302,5 @@ def example_with_overlap_tracking():
         print(f"  位置: {chunk.position.char_start}-{chunk.position.char_end}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     example_with_overlap_tracking()
