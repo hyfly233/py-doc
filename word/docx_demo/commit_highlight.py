@@ -29,12 +29,116 @@ class AnnotationConfig:
     font_color: Optional[str] = None  # 字体颜色名称
 
 
+def _create_char_format_mapping(paragraph: Paragraph) -> List:
+    """
+    创建字符到格式的映射
+    param paragraph: 目标段落
+    return: 每个字符对应的格式列表
+    """
+    char_formats = []
+    for run in paragraph.runs:
+        for _ in run.text:
+            char_formats.append(run.font)
+    return char_formats
+
+
+def _clear_paragraph_runs(paragraph: Paragraph):
+    """
+    清空段落的所有runs
+    param paragraph: 目标段落
+    """
+    for run in paragraph.runs:
+        run.clear()
+
+    while len(paragraph.runs) > 0:
+        paragraph._element.remove(paragraph.runs[0]._element)
+
+    # 从后往前删除，避免索引问题
+    # for i in range(len(paragraph.runs) - 1, -1, -1):
+    #     paragraph.runs[i].clear()
+    #     # 使用公共方法删除run
+    #     paragraph._p.remove(paragraph.runs[i]._r)
+
+
+def _add_char_with_fallback_format(paragraph: Paragraph, char: str,
+                                   char_formats: List, char_idx: int):
+    """
+    使用备用格式添加字符
+    param paragraph: 目标段落
+    param char: 目标字符
+    param char_formats: 每个字符对应的格式列表
+    param char_idx: 当前字符索引
+    return: None
+    """
+    if char_idx == 0:
+        char_run = paragraph.add_run(char)
+        if char_formats:
+            copy_font_format(char_formats[-1], char_run.font)
+            if char_formats[-1].color.rgb:
+                char_run.font.color.rgb = char_formats[-1].color.rgb
+    else:
+        if paragraph.runs:
+            paragraph.runs[-1].text += char
+
+
+def _apply_annotation_format(run, config: AnnotationConfig):
+    """应用标注格式"""
+    if config.font_color:
+        _apply_font_color(run, config.font_color)
+
+    if config.highlight:
+        _apply_highlight_color(run, config.highlight_color)
+
+
+def _add_comment(doc, run, config: AnnotationConfig, word: str):
+    """添加注释"""
+    try:
+        comment_text = config.comment_text or f"标注词语: {word}"
+        doc.add_comment(
+            runs=[run],
+            text=comment_text,
+            author=config.comment_author,
+            initials=config.comment_initials
+        )
+    except Exception as e:
+        print(f"添加注释失败: {e}")
+
+
+def _add_normal_text(paragraph: Paragraph, text: str,
+                     char_formats: List, start_pos: int):
+    """添加普通文本，保持原有格式"""
+    for char_idx, char in enumerate(text):
+        format_idx = start_pos + char_idx
+
+        if format_idx < len(char_formats):
+            # 检查是否需要创建新run
+            need_new_run = (char_idx == 0 or
+                            (format_idx > 0 and
+                             char_formats[format_idx] != char_formats[format_idx - 1]))
+
+            if need_new_run:
+                char_run = paragraph.add_run(char)
+                copy_font_format(char_formats[format_idx], char_run.font)
+                # 保持原有颜色
+                if char_formats[format_idx].color.rgb:
+                    char_run.font.color.rgb = char_formats[format_idx].color.rgb
+            else:
+                # 添加到最后一个run
+                if paragraph.runs:
+                    paragraph.runs[-1].text += char
+        else:
+            # 使用最后可用格式
+            _add_char_with_fallback_format(paragraph, char, char_formats, char_idx)
+
+
 class DocumentAnnotator:
     """文档标注器"""
 
     def __init__(self, word_configs: Dict[str, AnnotationConfig]):
         self.word_configs = word_configs
+        # 将词语按长度排序，防止子串冲突，如 "喵喵公司" "公司" "喵"
         self.sorted_words = sorted(word_configs.keys(), key=len, reverse=True)
+        # 构建正则表达式模式，如 "喵喵公司|公司|喵"
         self.pattern = '|'.join(re.escape(word) for word in self.sorted_words)
 
     def annotate_document(self, file_path: str) -> str:
@@ -81,7 +185,10 @@ class DocumentAnnotator:
             self._process_single_paragraph(paragraph, doc, i)
 
     def _process_single_paragraph(self, paragraph: Paragraph, doc, index: int):
-        """处理单个段落"""
+        """
+        处理单个段落
+        param paragraph: 目标段落
+        """
         full_text = paragraph.text
 
         # 检查是否包含任何目标词语
@@ -92,13 +199,13 @@ class DocumentAnnotator:
 
         try:
             # 创建字符到格式的映射
-            char_formats = self._create_char_format_mapping(paragraph)
+            char_formats = _create_char_format_mapping(paragraph)
 
             # 分割文本
             parts = re.split(f'({self.pattern})', full_text)
 
             # 清空并重建段落
-            self._clear_paragraph_runs(paragraph)
+            _clear_paragraph_runs(paragraph)
             self._rebuild_paragraph(paragraph, parts, char_formats, doc)
 
             print(f"  段落 {index + 1}, 处理后的内容: {paragraph.text}")
@@ -106,25 +213,16 @@ class DocumentAnnotator:
         except Exception as e:
             print(f"处理段落 ({index + 1})时发生错误: {e}")
 
-    def _create_char_format_mapping(self, paragraph: Paragraph) -> List:
-        """创建字符到格式的映射"""
-        char_formats = []
-        for run in paragraph.runs:
-            for char in run.text:
-                char_formats.append(run.font)
-        return char_formats
-
-    def _clear_paragraph_runs(self, paragraph: Paragraph):
-        """清空段落的所有runs"""
-        for run in paragraph.runs:
-            run.clear()
-
-        while len(paragraph.runs) > 0:
-            paragraph._element.remove(paragraph.runs[0]._element)
-
     def _rebuild_paragraph(self, paragraph: Paragraph, parts: List[str],
                            char_formats: List, doc):
-        """重建段落内容"""
+        """
+        重建段落内容
+        param paragraph: 目标段落
+        param parts: 分割后的文本部分列表
+        param char_formats: 每个字符对应的格式列表
+        param doc: 当前文档对象
+        return: None
+        """
         current_pos = 0
 
         for part in parts:
@@ -134,17 +232,27 @@ class DocumentAnnotator:
             if part in self.sorted_words:
                 self._add_annotated_word(paragraph, part, char_formats, current_pos, doc)
             else:
-                self._add_normal_text(paragraph, part, char_formats, current_pos)
+                _add_normal_text(paragraph, part, char_formats, current_pos)
 
             current_pos += len(part)
 
     def _add_annotated_word(self, paragraph: Paragraph, word: str,
                             char_formats: List, current_pos: int, doc):
-        """添加标注的词语"""
+        """
+        添加标注的词语
+        param paragraph: 目标段落
+        param word: 目标词语
+        param char_formats: 每个字符对应的格式列表
+        param current_pos: 当前字符位置
+        param doc: 当前文档对象
+        return: None
+        """
         config = self.word_configs[word]
 
         # 构建标注文本
         annotated_word = word
+
+        # 突出显示 (添加括号)
         if config.emphasize:
             annotated_word = f"{config.emphasize_symbols[0]}{word}{config.emphasize_symbols[1]}"
 
@@ -153,74 +261,15 @@ class DocumentAnnotator:
 
         # 继承原格式
         if current_pos < len(char_formats):
+            # 找出当前词语原有的格式，复制到新 run
             copy_font_format(char_formats[current_pos], target_run.font)
 
         # 应用标注格式
-        self._apply_annotation_format(target_run, config)
+        _apply_annotation_format(target_run, config)
 
         # 添加注释
         if config.add_comment:
-            self._add_comment(doc, target_run, config, word)
-
-    def _add_normal_text(self, paragraph: Paragraph, text: str,
-                         char_formats: List, start_pos: int):
-        """添加普通文本，保持原有格式"""
-        for char_idx, char in enumerate(text):
-            format_idx = start_pos + char_idx
-
-            if format_idx < len(char_formats):
-                # 检查是否需要创建新run
-                need_new_run = (char_idx == 0 or
-                                (format_idx > 0 and
-                                 char_formats[format_idx] != char_formats[format_idx - 1]))
-
-                if need_new_run:
-                    char_run = paragraph.add_run(char)
-                    copy_font_format(char_formats[format_idx], char_run.font)
-                    # 保持原有颜色
-                    if char_formats[format_idx].color.rgb:
-                        char_run.font.color.rgb = char_formats[format_idx].color.rgb
-                else:
-                    # 添加到最后一个run
-                    if paragraph.runs:
-                        paragraph.runs[-1].text += char
-            else:
-                # 使用最后可用格式
-                self._add_char_with_fallback_format(paragraph, char, char_formats, char_idx)
-
-    def _add_char_with_fallback_format(self, paragraph: Paragraph, char: str,
-                                       char_formats: List, char_idx: int):
-        """使用备用格式添加字符"""
-        if char_idx == 0:
-            char_run = paragraph.add_run(char)
-            if char_formats:
-                copy_font_format(char_formats[-1], char_run.font)
-                if char_formats[-1].color.rgb:
-                    char_run.font.color.rgb = char_formats[-1].color.rgb
-        else:
-            if paragraph.runs:
-                paragraph.runs[-1].text += char
-
-    def _apply_annotation_format(self, run, config: AnnotationConfig):
-        """应用标注格式"""
-        if config.font_color:
-            _apply_font_color(run, config.font_color)
-
-        if config.highlight:
-            _apply_highlight_color(run, config.highlight_color)
-
-    def _add_comment(self, doc, run, config: AnnotationConfig, word: str):
-        """添加注释"""
-        try:
-            comment_text = config.comment_text or f"标注词语: {word}"
-            doc.add_comment(
-                runs=[run],
-                text=comment_text,
-                author=config.comment_author,
-                initials=config.comment_initials
-            )
-        except Exception as e:
-            print(f"添加注释失败: {e}")
+            _add_comment(doc, target_run, config, word)
 
 
 def annotate_words_with_configs(file_path: str, word_configs: Dict[str, AnnotationConfig]) -> str:
