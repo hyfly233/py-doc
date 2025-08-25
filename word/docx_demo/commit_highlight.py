@@ -29,69 +29,19 @@ class AnnotationConfig:
     font_color: Optional[str] = None  # 字体颜色名称
 
 
-def _create_char_format_mapping(paragraph: Paragraph) -> List:
-    """
-    创建字符到格式的映射
-    param paragraph: 目标段落
-    return: 每个字符对应的格式列表
-    """
-    char_formats = []
-    for run in paragraph.runs:
-        for _ in run.text:
-            char_formats.append(run.font)
-    return char_formats
-
-
-def _clear_paragraph_runs(paragraph: Paragraph):
-    """
-    清空段落的所有runs
-    param paragraph: 目标段落
-    """
-    for run in paragraph.runs:
-        run.clear()
-
-    while len(paragraph.runs) > 0:
-        paragraph._element.remove(paragraph.runs[0]._element)
-
-    # 从后往前删除，避免索引问题
-    # for i in range(len(paragraph.runs) - 1, -1, -1):
-    #     paragraph.runs[i].clear()
-    #     # 使用公共方法删除run
-    #     paragraph._p.remove(paragraph.runs[i]._r)
-
-
-def _add_char_with_fallback_format(paragraph: Paragraph, char: str,
-                                   char_formats: List, char_idx: int):
-    """
-    使用备用格式添加字符
-    param paragraph: 目标段落
-    param char: 目标字符
-    param char_formats: 每个字符对应的格式列表
-    param char_idx: 当前字符索引
-    return: None
-    """
-    if char_idx == 0:
-        char_run = paragraph.add_run(char)
-        if char_formats:
-            copy_font_format(char_formats[-1], char_run.font)
-            if char_formats[-1].color.rgb:
-                char_run.font.color.rgb = char_formats[-1].color.rgb
-    else:
-        if paragraph.runs:
-            paragraph.runs[-1].text += char
-
-
-def _apply_annotation_format(run, config: AnnotationConfig):
-    """应用标注格式"""
-    if config.font_color:
-        _apply_font_color(run, config.font_color)
-
-    if config.highlight:
-        _apply_highlight_color(run, config.highlight_color)
-
-
 def _add_comment(doc, run, config: AnnotationConfig, word: str):
-    """添加注释"""
+    """
+    添加注释
+
+    Args:
+        doc: 当前文档对象
+        run: 目标run
+        config: 标注配置
+        word: 被注释的词语
+
+    Returns:
+        None
+    """
     try:
         comment_text = config.comment_text or f"标注词语: {word}"
         doc.add_comment(
@@ -106,7 +56,18 @@ def _add_comment(doc, run, config: AnnotationConfig, word: str):
 
 def _add_normal_text(paragraph: Paragraph, text: str,
                      char_formats: List, start_pos: int):
-    """添加普通文本，保持原有格式"""
+    """
+    添加普通文本，保持原有格式
+
+    Args:
+        paragraph: 目标段落
+        text: 目标文本
+        char_formats: 每个字符对应的格式列表
+        start_pos: 当前文本在段落中的起始位置
+
+    Returns:
+        None
+    """
     for char_idx, char in enumerate(text):
         format_idx = start_pos + char_idx
 
@@ -119,7 +80,7 @@ def _add_normal_text(paragraph: Paragraph, text: str,
             if need_new_run:
                 char_run = paragraph.add_run(char)
                 copy_font_format(char_formats[format_idx], char_run.font)
-                # 保持原有颜色
+                # 保持原有颜色，copy_font_format 没有复制颜色
                 if char_formats[format_idx].color.rgb:
                     char_run.font.color.rgb = char_formats[format_idx].color.rgb
             else:
@@ -129,6 +90,147 @@ def _add_normal_text(paragraph: Paragraph, text: str,
         else:
             # 使用最后可用格式
             _add_char_with_fallback_format(paragraph, char, char_formats, char_idx)
+
+
+def _add_char_with_fallback_format(paragraph: Paragraph, char: str,
+                                   char_formats: List, char_idx: int):
+    """
+    使用备用格式添加字符
+
+    Args:
+        paragraph: 目标段落
+        char: 目标字符
+        char_formats: 每个字符对应的格式列表
+        char_idx: 当前字符索引
+        
+    Returns:
+        None
+    """
+    if char_idx == 0:
+        char_run = paragraph.add_run(char)
+        if char_formats:
+            copy_font_format(char_formats[-1], char_run.font)
+            if char_formats[-1].color.rgb:
+                char_run.font.color.rgb = char_formats[-1].color.rgb
+    else:
+        if paragraph.runs:
+            paragraph.runs[-1].text += char
+
+
+def _apply_annotation_format(run, config: AnnotationConfig):
+    """
+    应用标注格式
+
+    Args:
+        run: 目标run
+        config: 标注配置
+
+    Returns:   
+        None
+    """
+    # 修改字体颜色
+    if config.font_color:
+        _apply_font_color(run, config.font_color)
+
+    # 高亮
+    if config.highlight:
+        _apply_highlight_color(run, config.highlight_color)
+
+
+def _apply_highlight_color(run, color_name: str):
+    """
+    应用高亮颜色（使用颜色名称）
+
+    Args:
+        run: 目标run
+        color_name: 颜色名称
+
+    Returns:
+        None
+    """
+    from docx.enum.text import WD_COLOR_INDEX
+
+    color_map = {
+        "yellow": WD_COLOR_INDEX.YELLOW,
+        "red": WD_COLOR_INDEX.RED,
+        "green": WD_COLOR_INDEX.BRIGHT_GREEN,
+        "blue": WD_COLOR_INDEX.BLUE,
+        "pink": WD_COLOR_INDEX.PINK,
+        "cyan": WD_COLOR_INDEX.TURQUOISE,
+        "gray": WD_COLOR_INDEX.GRAY_25,
+        "purple": WD_COLOR_INDEX.VIOLET,
+        "lime": WD_COLOR_INDEX.BRIGHT_GREEN,
+    }
+
+    run.font.highlight_color = color_map.get(color_name.lower(), WD_COLOR_INDEX.YELLOW)
+
+
+def _apply_font_color(run, color_name: str):
+    """
+    应用字体颜色（使用颜色名称）
+
+    Args:
+        run: 目标run
+        color_name: 颜色名称
+
+    Returns:
+        None
+    """
+    from docx.shared import RGBColor
+
+    color_map = {
+        "red": RGBColor(255, 0, 0),
+        "blue": RGBColor(0, 0, 255),
+        "green": RGBColor(0, 128, 0),
+        "purple": RGBColor(128, 0, 128),
+        "brown": RGBColor(165, 42, 42),
+        "black": RGBColor(0, 0, 0),
+        "gray": RGBColor(128, 128, 128),
+        "pink": RGBColor(255, 192, 203),
+        "yellow": RGBColor(255, 255, 0),
+    }
+
+    run.font.color.rgb = color_map.get(color_name.lower(), RGBColor(0, 0, 0))
+
+
+def _create_char_format_mapping(paragraph: Paragraph) -> List:
+    """
+    创建字符到格式的映射
+
+    Args:
+        paragraph: 目标段落
+
+    Returns:
+        List 每个字符对应的格式列表
+    """
+    char_formats = []
+    for run in paragraph.runs:
+        for _ in run.text:
+            char_formats.append(run.font)
+    return char_formats
+
+
+def _clear_paragraph_runs(paragraph: Paragraph):
+    """
+    清空段落的所有runs
+
+    Args:
+        paragraph: 目标段落
+
+    Returns:
+        None
+    """
+    for run in paragraph.runs:
+        run.clear()
+
+    while len(paragraph.runs) > 0:
+        paragraph._element.remove(paragraph.runs[0]._element)
+
+    # 从后往前删除，避免索引问题
+    # for i in range(len(paragraph.runs) - 1, -1, -1):
+    #     paragraph.runs[i].clear()
+    #     # 使用公共方法删除run
+    #     paragraph._p.remove(paragraph.runs[i]._r)
 
 
 class DocumentAnnotator:
@@ -142,7 +244,15 @@ class DocumentAnnotator:
         self.pattern = '|'.join(re.escape(word) for word in self.sorted_words)
 
     def annotate_document(self, file_path: str) -> str:
-        """标注整个文档"""
+        """
+        标注整个文档
+
+        Args:
+            file_path: 源文档路径
+
+        Returns:
+            None
+        """
         if not file_path.endswith('.docx'):
             raise ValueError("只支持 .docx 格式文件")
 
@@ -171,7 +281,16 @@ class DocumentAnnotator:
             raise
 
     def _process_tables(self, tables, doc):
-        """处理所有表格"""
+        """
+        处理所有表格
+
+        Args:
+            tables: 文档中的表格列表
+            doc: 当前文档对象
+
+        Returns:
+            None
+        """
         for i, table in enumerate(tables):
             for j, row in enumerate(table.rows):
                 for k, cell in enumerate(row.cells):
@@ -180,14 +299,28 @@ class DocumentAnnotator:
                         self._process_paragraphs(cell.paragraphs, doc)
 
     def _process_paragraphs(self, paragraphs: List[Paragraph], doc):
-        """处理段落列表"""
+        """
+        处理段落列表
+
+        Args:
+            paragraphs: 目标段落列表
+            doc: 当前文档对象
+
+        Returns:
+            None
+        """
         for i, paragraph in enumerate(paragraphs):
             self._process_single_paragraph(paragraph, doc, i)
 
     def _process_single_paragraph(self, paragraph: Paragraph, doc, index: int):
         """
         处理单个段落
-        param paragraph: 目标段落
+
+        Args:
+            paragraph: 目标段落
+
+        Returns:
+            None
         """
         full_text = paragraph.text
 
@@ -217,11 +350,15 @@ class DocumentAnnotator:
                            char_formats: List, doc):
         """
         重建段落内容
-        param paragraph: 目标段落
-        param parts: 分割后的文本部分列表
-        param char_formats: 每个字符对应的格式列表
-        param doc: 当前文档对象
-        return: None
+
+        Args:
+            paragraph: 目标段落
+            parts: 分割后的文本部分列表
+            char_formats: 每个字符对应的格式列表
+            doc: 当前文档对象
+
+        Returns:
+            None
         """
         current_pos = 0
 
@@ -240,12 +377,16 @@ class DocumentAnnotator:
                             char_formats: List, current_pos: int, doc):
         """
         添加标注的词语
-        param paragraph: 目标段落
-        param word: 目标词语
-        param char_formats: 每个字符对应的格式列表
-        param current_pos: 当前字符位置
-        param doc: 当前文档对象
-        return: None
+
+        Args:
+            paragraph: 目标段落
+            word: 目标词语
+            char_formats: 每个字符对应的格式列表
+            current_pos: 当前字符位置
+            doc: 当前文档对象
+
+        Returns:
+            None
         """
         config = self.word_configs[word]
 
@@ -305,44 +446,6 @@ def annotate_multiple_words_same_config(file_path: str, target_words: List[str],
     """
     word_configs = {word: config for word in target_words}
     return annotate_words_with_configs(file_path, word_configs)
-
-
-def _apply_highlight_color(run, color_name: str):
-    """应用高亮颜色（使用颜色名称）"""
-    from docx.enum.text import WD_COLOR_INDEX
-
-    color_map = {
-        "yellow": WD_COLOR_INDEX.YELLOW,
-        "red": WD_COLOR_INDEX.RED,
-        "green": WD_COLOR_INDEX.BRIGHT_GREEN,
-        "blue": WD_COLOR_INDEX.BLUE,
-        "pink": WD_COLOR_INDEX.PINK,
-        "cyan": WD_COLOR_INDEX.TURQUOISE,
-        "gray": WD_COLOR_INDEX.GRAY_25,
-        "purple": WD_COLOR_INDEX.VIOLET,
-        "lime": WD_COLOR_INDEX.BRIGHT_GREEN,
-    }
-
-    run.font.highlight_color = color_map.get(color_name.lower(), WD_COLOR_INDEX.YELLOW)
-
-
-def _apply_font_color(run, color_name: str):
-    """应用字体颜色（使用颜色名称）"""
-    from docx.shared import RGBColor
-
-    color_map = {
-        "red": RGBColor(255, 0, 0),
-        "blue": RGBColor(0, 0, 255),
-        "green": RGBColor(0, 128, 0),
-        "purple": RGBColor(128, 0, 128),
-        "brown": RGBColor(165, 42, 42),
-        "black": RGBColor(0, 0, 0),
-        "gray": RGBColor(128, 128, 128),
-        "pink": RGBColor(255, 192, 203),
-        "yellow": RGBColor(255, 255, 0),
-    }
-
-    run.font.color.rgb = color_map.get(color_name.lower(), RGBColor(0, 0, 0))
 
 
 if __name__ == '__main__':
